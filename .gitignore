@@ -1,0 +1,50 @@
+$CURSOR$
+# Build directories
+build/
+bin/
+lib/
+out/
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CMakeLists.txt.user
+Makefile
+
+# Compiled object files, libraries, and executables
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.exe
+
+# Debug files
+*.log
+*.pdb
+*.pyc
+
+# IDE/editor directories
+.vscode/
+.idea/
+*.code-workspace
+
+# macOS
+.DS_Store
+
+# Backup and swap files
+*~
+*.swp
+*.swo
+
+# Coverage and test output
+coverage/
+testing/
+
+# Generated files
+compile_commands.json
+
+# Misc
+.cache/
