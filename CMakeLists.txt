@@ -11,9 +11,11 @@ include(FetchContent)
 list(PREPEND CMAKE_PREFIX_PATH "/Volumes/Seagate/QT2/6.11.1/macos")
 include_directories(/Volumes/Seagate/QT2/6.11.1/macos/lib)
 
-set(MI_OVERRIDE OFF CACHE BOOL "" FORCE)
+set(MI_OVERRIDE ON CACHE BOOL "" FORCE)
 set(MI_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(MI_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(MI_BUILD_SHARED ON CACHE BOOL "" FORCE)
+set(MI_BUILD_STATIC OFF CACHE BOOL "" FORCE)
+set(MI_USE_CXX OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     mimalloc
@@ -29,6 +31,8 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Network Sql Xml)
 
+add_subdirectory(equinox)
+
 add_executable(
     rsbrowser
     w_browser.hpp w_browser.cpp
@@ -37,6 +41,7 @@ add_executable(
     main.cpp)
 
 target_link_libraries(rsbrowser PRIVATE 
+    mimalloc
     Qt6::Widgets
     Qt6::Core
     Qt6::Gui
