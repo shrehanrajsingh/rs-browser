@@ -125,6 +125,122 @@ HTMLParser::_parser_goto_endofbracket ()
 }
 
 void
+HTMLParser::_parser_parse_attr (Node *n)
+{
+  _skip_whitespaces ();
+
+  bool saw_eq = false;
+  std::string key = "";
+  std::string val = "";
+
+  while (*rdp != '\0' && *rdp != '=' && *rdp != '>'
+         && !std::isspace (static_cast<unsigned char> (*rdp)))
+    key.push_back (*rdp++);
+
+  if (std::isspace (static_cast<unsigned char> (*rdp)) || *rdp == '>')
+    {
+      n->nd.set_attr (key, val);
+      return;
+    }
+  else
+    {
+      if (*rdp == '=')
+        {
+          bool in_str = false;
+          bool mature_end = false;
+          char str_tok = 0;
+          ++rdp;
+
+          while (*rdp != '\0')
+            {
+              char c = *rdp++;
+              val.push_back (c);
+
+              if (c == '\"' || c == '\'')
+                {
+                  if (!in_str)
+                    {
+                      in_str = true;
+                      str_tok = c;
+                    }
+                  else
+                    {
+                      if (*(rdp - 2) == '\\')
+                        {
+                          if (*(rdp - 3) == '\\')
+                            {
+                              in_str = false;
+                              str_tok = 0;
+                            }
+                          else
+                            {
+                              /* backslash char */
+                            }
+                        }
+                      else
+                        {
+                          in_str = false;
+                          str_tok = 0;
+                        }
+                    }
+                }
+
+              if ((c == '>' || std::isspace (static_cast<unsigned char> (c)))
+                  && !in_str)
+                {
+                  mature_end = true;
+                  --rdp; /* point to '>' or ' ' */
+                  break;
+                }
+            }
+
+          if (!mature_end)
+            {
+              get_error () = EQ_HP_INVALID_SYNTAX;
+              return;
+            }
+
+          n->nd.set_attr (key, val);
+        }
+      else
+        {
+          get_error () = EQ_HP_INVALID_SYNTAX;
+          return;
+        }
+    }
+}
+
+Node *
+HTMLParser::_parser_maketag_withattrs ()
+{
+  std::string tag_name = "";
+  tag_name.reserve (16);
+
+  Node *n = new Node ();
+
+  while (*rdp != '\0' && !std::isspace (static_cast<unsigned char> (*rdp))
+         && *rdp != '>')
+    tag_name.push_back (*rdp++);
+
+  /* attribute parse loop */
+  if (*rdp == '>')
+    {
+      n->nd.name = tag_name;
+    }
+  else
+    {
+      while (*rdp != '>')
+        {
+          _parser_parse_attr (n);
+        }
+
+      ++rdp; // eat '>'
+    }
+
+  return n;
+}
+
+void
 HTMLParser::build_tree ()
 {
   _set_ptrs ();
@@ -165,11 +281,19 @@ HTMLParser::build_tree ()
                       return;
                     }
 
-                  /* TODO */
+                  Node *b = q.pop ();
+                  if (q.empty ())
+                    {
+                      get_error () = EQ_HP_NO_HTML_TAG;
+                      return;
+                    }
+
+                  Node::add_next (q.back (), b);
                 }
               else
                 {
-                  /* TODO */
+                  ++rdp;
+                  Node *t = _parser_maketag_withattrs ();
                 }
             }
           else

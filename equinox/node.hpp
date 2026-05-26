@@ -18,6 +18,8 @@ public:
   Node () : next{ nullptr } {}
   Node (Node *_Next) : next{ nullptr } {}
 
+  static void add_next (Node *, Node *);
+
   ~Node ()
   {
     if (next != nullptr)

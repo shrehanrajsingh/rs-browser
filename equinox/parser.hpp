@@ -30,6 +30,9 @@ private:
    * character after '>'
    */
   void _parser_goto_endofbracket ();
+  void _parser_parse_attr (Node *);
+
+  Node *_parser_maketag_withattrs ();
 
   int err;
 
@@ -38,6 +41,7 @@ public:
     EQ_HP_INVALID_SYNTAX = 1,
     EQ_HP_NO_CLOSING_BRACKET_FOUND = 2,
     EQ_HP_INVALID_CLOSING_TAG = 3,
+    EQ_HP_NO_HTML_TAG = 4,
   };
 
   HTMLParser () : root{ nullptr }, rdp{ nullptr }, end{ false }, err{ 0 } {}
