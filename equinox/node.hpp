@@ -16,6 +16,8 @@ public:
   NodeData nd;
 
   Node () : next{ nullptr } {}
+  Node (Node *_Next) : next{ nullptr } {}
+
   ~Node ()
   {
     if (next != nullptr)
