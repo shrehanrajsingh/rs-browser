@@ -20,6 +20,8 @@ public:
 
   static void add_next (Node *, Node *);
 
+  void print ();
+
   ~Node ()
   {
     if (next != nullptr)

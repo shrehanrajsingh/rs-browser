@@ -33,11 +33,13 @@ private:
   void _parser_parse_attr (Node *);
 
   Node *_parser_maketag_withattrs ();
+  Node *_parser_make_text_tag ();
 
   int err;
 
 public:
-  static enum {
+  enum
+  {
     EQ_HP_INVALID_SYNTAX = 1,
     EQ_HP_NO_CLOSING_BRACKET_FOUND = 2,
     EQ_HP_INVALID_CLOSING_TAG = 3,
@@ -46,7 +48,8 @@ public:
 
   HTMLParser () : root{ nullptr }, rdp{ nullptr }, end{ false }, err{ 0 } {}
   HTMLParser (std::string _Raw_Data)
-      : root{ nullptr }, rdp{ nullptr }, end{ false }, err{ 0 }
+      : root{ nullptr }, rdp{ nullptr }, end{ false }, err{ 0 },
+        raw_data{ _Raw_Data }
   {
   }
 
@@ -54,6 +57,12 @@ public:
 
   inline bool has_error ();
   inline int &get_error ();
+
+  inline Node *
+  get_tree ()
+  {
+    return root;
+  }
 
   ~HTMLParser ()
   {

@@ -19,7 +19,7 @@ HTMLParser::_parser_stop ()
 void
 HTMLParser::_set_ptrs ()
 {
-  rdp = raw_data.data ();
+  rdp = const_cast<char *> (raw_data.data ());
 
   if (*rdp == '\0')
     _parser_stop () = true;
@@ -137,8 +137,19 @@ HTMLParser::_parser_parse_attr (Node *n)
          && !std::isspace (static_cast<unsigned char> (*rdp)))
     key.push_back (*rdp++);
 
+  if (!key.size ())
+    return;
+
+  LOG ("parsing attribute '%s'\n", key.data ());
+  if (key == "/" && *rdp != '\0' && *rdp == '>')
+    {
+      n->nd.is_inline_elem = true;
+      return;
+    }
+
   if (std::isspace (static_cast<unsigned char> (*rdp)) || *rdp == '>')
     {
+      LOG ("attribute '%s' has no value\n", key.data ());
       n->nd.set_attr (key, val);
       return;
     }
@@ -154,7 +165,6 @@ HTMLParser::_parser_parse_attr (Node *n)
           while (*rdp != '\0')
             {
               char c = *rdp++;
-              val.push_back (c);
 
               if (c == '\"' || c == '\'')
                 {
@@ -192,6 +202,8 @@ HTMLParser::_parser_parse_attr (Node *n)
                   --rdp; /* point to '>' or ' ' */
                   break;
                 }
+
+              val.push_back (c);
             }
 
           if (!mature_end)
@@ -200,10 +212,12 @@ HTMLParser::_parser_parse_attr (Node *n)
               return;
             }
 
+          LOG ("attribute '%s' has value = %s\n", key.data (), val.data ());
           n->nd.set_attr (key, val);
         }
       else
         {
+          LOG ("Syntax Error. Aborting...\n");
           get_error () = EQ_HP_INVALID_SYNTAX;
           return;
         }
@@ -222,20 +236,33 @@ HTMLParser::_parser_maketag_withattrs ()
          && *rdp != '>')
     tag_name.push_back (*rdp++);
 
+  LOG ("tag name = '%s'\n", tag_name.data ());
+  n->nd.name = tag_name;
+
   /* attribute parse loop */
-  if (*rdp == '>')
-    {
-      n->nd.name = tag_name;
-    }
-  else
+  if (*rdp != '>')
     {
       while (*rdp != '>')
         {
           _parser_parse_attr (n);
         }
-
-      ++rdp; // eat '>'
     }
+
+  ++rdp; // eat '>'
+  return n;
+}
+
+Node *
+HTMLParser::_parser_make_text_tag ()
+{
+  Node *n = new Node ();
+  n->nd.name = "[text]";
+  std::string tval = "";
+
+  while (*rdp != '\0' && *rdp != '<')
+    tval.push_back (*rdp++); /* keep it simple */
+
+  LOG ("parsed [text] with value = '%s'\n", tval.data ());
 
   return n;
 }
@@ -247,27 +274,32 @@ HTMLParser::build_tree ()
   _init_root ();
   _skip_whitespaces ();
 
-  std::queue<Node *> q;
+  std::stack<Node *> q;
   q.push (root);
 
-  if (*rdp++ == '<' && _parser_next ("html"))
+  if (*rdp++ == '<' && _parser_next (const_cast<char *> ("html")))
     {
       _parser_goto_endofbracket ();
 
       if (get_error ())
-        return;
+        {
+          return;
+        }
 
       while (!_parser_stop () && !get_error ())
         {
           _skip_whitespaces ();
 
+          LOG ("parsing *rdp = '%c'\n", *rdp);
           if (*rdp == '<')
             {
               char nxt = *(rdp + 1);
 
               if (nxt == '/')
                 {
-                  char *s = _parser_snapshot ();
+                  LOG ("parsing closing tag '%s'\n",
+                       q.top ()->nd.name.data ());
+                  char *s = _parser_snapshot () + 2 /* eat </ */;
                   _parser_goto_endofbracket ();
 
                   if (get_error ())
@@ -275,25 +307,55 @@ HTMLParser::build_tree ()
 
                   *(rdp - 1) = '\0';
 
-                  if (q.empty () || q.back ()->nd.name != s)
+                  if (q.empty () || q.top ()->nd.name != s)
                     {
+                      if (q.empty ())
+                        {
+                          LOG ("Empty queue. Aborting...\n");
+                        }
+                      else
+                        {
+                          LOG ("Invalid closing tag mismatch '%s' and '%s'\n",
+                               q.top ()->nd.name.data (), s);
+                        }
+
                       get_error () = EQ_HP_INVALID_CLOSING_TAG;
                       return;
                     }
 
-                  Node *b = q.pop ();
+                  Node *b = q.top ();
+                  q.pop ();
                   if (q.empty ())
                     {
+                      LOG ("Empty queue. Aborting...\n");
                       get_error () = EQ_HP_NO_HTML_TAG;
                       return;
                     }
 
-                  Node::add_next (q.back (), b);
+                  Node::add_next (q.top (), b);
                 }
               else
                 {
-                  ++rdp;
+                  ++rdp; // eat '<'
                   Node *t = _parser_maketag_withattrs ();
+
+                  if (t->nd.is_inline_elem)
+                    {
+                      LOG ("tag '%s' is an inline tag\n", t->nd.name.data ());
+                      if (q.empty ())
+                        {
+                          get_error () = EQ_HP_INVALID_CLOSING_TAG;
+                          return;
+                        }
+
+                      Node::add_next (q.top (), t);
+                    }
+                  else
+                    {
+                      LOG ("tag '%s' is not an inline tag\n",
+                           t->nd.name.data ());
+                      q.push (t);
+                    }
                 }
             }
           else
@@ -303,8 +365,6 @@ HTMLParser::build_tree ()
 
               if (get_error ())
                 return;
-
-              /* TODO */
             }
         }
     }

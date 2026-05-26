@@ -2,6 +2,9 @@
 #define EQUINOX_H
 
 #include "header.hpp"
+#include "ndata.hpp"
+#include "node.hpp"
+#include "parser.hpp"
 
 namespace equinox
 {

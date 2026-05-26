@@ -11,8 +11,10 @@ public:
   std::string name;
   std::unordered_map<std::string, std::string> attrs;
 
-  NodeData () {}
-  NodeData (std::string _Name) : name{ _Name } {}
+  bool is_inline_elem;
+
+  NodeData () : is_inline_elem{ false } {}
+  NodeData (std::string _Name) : name{ _Name }, is_inline_elem{ false } {}
 
   inline std::string &
   get_attr (std::string s)
@@ -28,6 +30,8 @@ public:
   {
     attrs[k] = v;
   }
+
+  void print ();
 
   ~NodeData () {}
 };
