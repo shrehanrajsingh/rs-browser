@@ -6,6 +6,7 @@ add_library(
     header.hpp
     node.hpp node.cpp
     ndata.hpp ndata.cpp
+    parser.hpp parser.cpp
     equinox.hpp equinox.cpp
 )
 
