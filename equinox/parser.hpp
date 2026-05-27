@@ -65,7 +65,7 @@ public:
   /**
    * hp.get_tag_fromstr ("html body h1");
    */
-  Node *get_tag_fromstr (std::string);
+  std::vector<Node *> get_tag_fromstr (std::string);
 
   inline Node *
   get_tree ()

@@ -23,11 +23,17 @@ main (int argc, char const *argv[])
 
   while (n != nullptr)
     {
-      std::cout << n->nd.name << '\n';
+      std::cout << n->nd.name << '\t' << n->children.size () << '\n';
       n = n->next;
     }
 
-  hp.get_tag_fromstr ("html body h1");
+  std::vector<Node *> h = hp.get_tag_fromstr ("html body h1");
+
+  for (auto &&i : h)
+    {
+      i->print ();
+      std::cout << "------------------------\n";
+    }
 
   return 0;
 }

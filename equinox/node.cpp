@@ -16,9 +16,12 @@ Node::print ()
 {
   nd.print ();
 
-  if (next != nullptr)
-    next->print ();
+  if (parent != nullptr)
+    {
+      std::cout << "parent:\n";
+      parent->print ();
+    }
   else
-    std::cout << "(nullptr)\n";
+    std::cout << "parent: (nullptr)\n";
 }
 } // namespace equinox

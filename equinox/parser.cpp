@@ -332,10 +332,6 @@ HTMLParser::build_tree ()
                       get_error () = EQ_HP_NO_HTML_TAG;
                       return;
                     }
-
-                  b->parent = q.top ();
-                  q.top ()->children.push_back (b);
-                  Node::add_next (q.top (), b);
                 }
               else
                 {
@@ -350,11 +346,11 @@ HTMLParser::build_tree ()
 
                   t->parent = q.top ();
                   q.top ()->children.push_back (t);
+                  Node::add_next (q.top (), t);
+
                   if (t->nd.is_inline_elem)
                     {
                       LOG ("tag '%s' is an inline tag\n", t->nd.name.data ());
-
-                      Node::add_next (q.top (), t);
                     }
                   else
                     {
@@ -409,10 +405,14 @@ HTMLParser::get_tag_fromname (std::string s)
   return r;
 }
 
-Node *
+static std::vector<Node *> __eq_rt_dfs_1 (std::vector<std::string> &, size_t,
+                                          std::vector<Node *> &);
+
+std::vector<Node *>
 HTMLParser::get_tag_fromstr (std::string v)
 {
   std::vector<std::string> v_sp;
+  std::vector<Node *> r;
 
   size_t rf = 0;
   size_t lr = 0;
@@ -421,6 +421,9 @@ HTMLParser::get_tag_fromstr (std::string v)
       v_sp.push_back (v.substr (lr, rf - lr));
       lr = rf + 1;
     }
+
+  if (rf == std::string::npos && lr == 0)
+    rf = v.size ();
 
   v_sp.push_back (v.substr (lr, rf - lr));
 
@@ -434,9 +437,80 @@ HTMLParser::get_tag_fromstr (std::string v)
 
   for (Node *&i : tagvs)
     {
-      /* TODO */
+      if (i->nd.name == v_sp[ti])
+        {
+          LOG ("got match '%s'\n", v_sp[ti].data ());
+
+          if (ti + 1 >= v_sp.size ())
+            {
+              r.push_back (i);
+              continue;
+            }
+
+          std::vector<Node *> p = __eq_rt_dfs_1 (v_sp, ti + 1, i->children);
+
+          if (p.size ())
+            {
+              LOG ("dfs got %lu results from root at '%s'\n", p.size (),
+                   v_sp[ti].data ());
+              r.insert (r.end (), p.begin (), p.end ());
+            }
+          else
+            {
+              LOG ("dfs got 0 (p is empty) results from root at '%s'\n",
+                   v_sp[ti].data ());
+            }
+        }
     }
 
-  return nullptr;
+  return r;
+}
+
+static std::vector<Node *>
+__eq_rt_dfs_1 (std::vector<std::string> &vsp, size_t ti,
+               std::vector<Node *> &children)
+{
+  std::vector<Node *> r;
+  if (ti >= vsp.size ())
+    return r;
+
+  if (ti + 1 == vsp.size ()) /* last tag */
+    {
+      LOG ("last tag at '%s'\n", vsp.back ().data ());
+      for (auto &&i : children)
+        {
+          if (i->nd.name == vsp.back ())
+            {
+              LOG ("got match at '%s'\n", vsp.back ().data ());
+              r.push_back (i);
+            }
+        }
+
+      return r;
+    }
+
+  for (Node *&i : children)
+    {
+      if (i->nd.name == vsp[ti])
+        {
+          LOG ("got match '%s'\n", vsp[ti].data ());
+
+          std::vector<Node *> p = __eq_rt_dfs_1 (vsp, ti + 1, i->children);
+
+          if (p.size ())
+            {
+              LOG ("dfs got %lu results from root at '%s'\n", p.size (),
+                   vsp[ti].data ());
+              r.insert (r.end (), p.begin (), p.end ());
+            }
+          else
+            {
+              LOG ("dfs got 0 (p is empty) results from root at '%s'\n",
+                   vsp[ti].data ());
+            }
+        }
+    }
+
+  return r;
 }
 } // namespace equinox
