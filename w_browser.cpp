@@ -9,6 +9,19 @@ w_browser::w_browser ()
   setWindowTitle (QString ("RSBrowser"));
   setStyleSheet ("background: white; color: black;");
 
+  // QApplication::setFont (QFont ("Arial", 14));
+  // QApplication::setFont (QFont (".AppleSystemUIFont", 14));
+  // QApplication::setFont (QFont ("Times New Roman", 14));
+
+  QFont font;
+
+  font.setFamilies ({ /* "Inter", "SF Pro Text", */ ".AppleSystemUIFont",
+                      "Helvetica Neue", "Arial" });
+
+  font.setPointSize (14);
+
+  QApplication::setFont (font);
+
   m_tabs = new QTabWidget;
 
   m_tabs->setDocumentMode (true);
