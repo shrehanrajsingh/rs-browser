@@ -140,12 +140,12 @@ HTMLParser::_parser_parse_attr (Node *n)
   if (!key.size ())
     return;
 
-  LOG ("parsing attribute '%s'\n", key.data ());
   if (key == "/" && *rdp != '\0' && *rdp == '>')
     {
       n->nd.is_inline_elem = true;
       return;
     }
+  LOG ("parsing attribute '%s'\n", key.data ());
 
   if (std::isspace (static_cast<unsigned char> (*rdp)) || *rdp == '>')
     {
@@ -260,8 +260,26 @@ HTMLParser::_parser_make_text_tag ()
   n->nd.name = "[text]";
   std::string tval = "";
 
+  bool last_chr_isssp = false;
+
   while (*rdp != '\0' && *rdp != '<')
-    tval.push_back (*rdp++); /* keep it simple */
+    {
+      if (std::isspace (static_cast<unsigned char> (*rdp)))
+        {
+          if (!last_chr_isssp)
+            {
+              tval.push_back (' ');
+              last_chr_isssp = true;
+            }
+
+          rdp++;
+          continue;
+        }
+      else
+        last_chr_isssp = false;
+
+      tval.push_back (*rdp++); /* keep it simple */
+    }
 
   LOG ("parsed [text] with value = '%s'\n", tval.data ());
   n->nd.set_attr ("_", tval);
@@ -327,7 +345,7 @@ HTMLParser::build_tree ()
 
                   Node *b = q.top ();
                   q.pop ();
-                  if (q.empty ())
+                  if (q.empty () && b->nd.name != "html")
                     {
                       LOG ("Empty queue. Aborting...\n");
                       get_error () = EQ_HP_NO_HTML_TAG;

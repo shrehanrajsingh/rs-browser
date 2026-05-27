@@ -57,6 +57,33 @@ w_browser::w_browser ()
                m_tabs->setCurrentIndex (m_tabs->count () - 1);
              });
 
+  /* get new tab html */
+  std::ifstream f ("../resources/home.html");
+
+  if (!f.is_open ())
+    {
+      /* TODO */
+      std::cout << "new tab html not found\n";
+      exit (EXIT_FAILURE);
+    }
+
+  std::stringstream buf;
+  buf << f.rdbuf ();
+  std::string fc = buf.str ();
+
+  new_tab_html = equinox::HTMLParser (fc);
+  new_tab_html.build_tree ();
+
+  equinox::Node *nt = new_tab_html.get_tree ();
+
+  // while (nt != nullptr)
+  //   {
+  //     std::cout << nt->nd.name << '\n';
+  //     nt = nt->next;
+  //   }
+
+  f.close ();
+
   setCentralWidget (m_tabs);
   add_tab ();
 }
@@ -66,8 +93,13 @@ w_browser::add_tab ()
 {
   int id = m_tabs->count () + 1;
 
-  v_browser *view = new v_browser (id);
+  v_browser *view = new v_browser (id, new_tab_html);
 
-  m_tabs->addTab (view, QString ("Tab %1").arg (id));
+  std::vector<equinox::Node *> tv = new_tab_html.get_tag_fromname ("title");
+
+  if (!tv.size ())
+    m_tabs->addTab (view, QString ("Tab %1").arg (id));
+  else
+    m_tabs->addTab (view, QString (tv[0]->get_text ().data ()));
 }
 } // namespace rs

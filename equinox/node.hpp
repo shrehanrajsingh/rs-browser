@@ -23,7 +23,8 @@ public:
 
   static void add_next (Node *, Node *);
 
-  void print ();
+  void print (bool _Print_Parent = false);
+  std::string get_text ();
 
   ~Node ()
   {

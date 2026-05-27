@@ -12,16 +12,31 @@ Node::add_next (Node *n, Node *p)
 }
 
 void
-Node::print ()
+Node::print (bool pp)
 {
   nd.print ();
 
-  if (parent != nullptr)
+  if (pp)
     {
-      std::cout << "parent:\n";
-      parent->print ();
+      if (parent != nullptr)
+        {
+          std::cout << "parent:\n";
+          parent->print ();
+        }
+      else
+        std::cout << "parent: (nullptr)\n";
     }
-  else
-    std::cout << "parent: (nullptr)\n";
+}
+
+std::string
+Node::get_text ()
+{
+  for (auto &&i : children)
+    {
+      if (i->nd.name == "[text]")
+        return i->nd.get_attr ("_");
+    }
+
+  return std::string{ "" };
 }
 } // namespace equinox

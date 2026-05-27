@@ -47,4 +47,5 @@ target_link_libraries(rsbrowser PRIVATE
     Qt6::Gui
     Qt6::Network
     Qt6::Sql
-    Qt6::Xml)
+    Qt6::Xml
+    equinox)

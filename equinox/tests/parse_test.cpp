@@ -9,6 +9,8 @@ const std::string html = R"(
         <body>
             <h1>Hello</h1>
             <h1>Hi</h1>
+
+            <img src="../../scene.jpg" alt="Alt Text" />
         </body>
     </html>
 )";
@@ -24,6 +26,7 @@ main (int argc, char const *argv[])
 
   while (n != nullptr)
     {
+      n->print ();
       std::cout << n->nd.name << '\t' << n->children.size () << '\n';
       n = n->next;
     }

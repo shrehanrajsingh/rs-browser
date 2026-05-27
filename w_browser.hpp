@@ -13,6 +13,8 @@ class w_browser : public QMainWindow
 private:
   QTabWidget *m_tabs;
 
+  equinox::HTMLParser new_tab_html;
+
 public:
   w_browser ();
   ~w_browser () = default;
