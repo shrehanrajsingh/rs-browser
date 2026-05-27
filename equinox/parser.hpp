@@ -58,6 +58,15 @@ public:
   inline bool has_error ();
   inline int &get_error ();
 
+  /**
+   * hp.get_tag_fromname ("h1");
+   */
+  std::vector<Node *> get_tag_fromname (std::string);
+  /**
+   * hp.get_tag_fromstr ("html body h1");
+   */
+  Node *get_tag_fromstr (std::string);
+
   inline Node *
   get_tree ()
   {

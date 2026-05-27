@@ -3,7 +3,7 @@
 const std::string html = R"(
     <html>
         <head>
-            <title id=1></title>
+            <title id=1>Hello</title>
         </head>
 
         <body>
@@ -19,7 +19,15 @@ main (int argc, char const *argv[])
 
   HTMLParser hp (html);
   hp.build_tree ();
-  hp.get_tree ()->print ();
+  Node *n = hp.get_tree ();
+
+  while (n != nullptr)
+    {
+      std::cout << n->nd.name << '\n';
+      n = n->next;
+    }
+
+  hp.get_tag_fromstr ("html body h1");
 
   return 0;
 }

@@ -208,6 +208,7 @@ HTMLParser::_parser_parse_attr (Node *n)
 
           if (!mature_end)
             {
+              LOG ("Invalid Syntax. Aborting...\n");
               get_error () = EQ_HP_INVALID_SYNTAX;
               return;
             }
@@ -240,13 +241,13 @@ HTMLParser::_parser_maketag_withattrs ()
   n->nd.name = tag_name;
 
   /* attribute parse loop */
-  if (*rdp != '>')
+  //   if (*rdp != '>')
+  // {
+  while (*rdp != '>')
     {
-      while (*rdp != '>')
-        {
-          _parser_parse_attr (n);
-        }
+      _parser_parse_attr (n);
     }
+  // }
 
   ++rdp; // eat '>'
   return n;
@@ -332,6 +333,8 @@ HTMLParser::build_tree ()
                       return;
                     }
 
+                  b->parent = q.top ();
+                  q.top ()->children.push_back (b);
                   Node::add_next (q.top (), b);
                 }
               else
@@ -339,14 +342,17 @@ HTMLParser::build_tree ()
                   ++rdp; // eat '<'
                   Node *t = _parser_maketag_withattrs ();
 
+                  if (q.empty ())
+                    {
+                      get_error () = EQ_HP_INVALID_CLOSING_TAG;
+                      return;
+                    }
+
+                  t->parent = q.top ();
+                  q.top ()->children.push_back (t);
                   if (t->nd.is_inline_elem)
                     {
                       LOG ("tag '%s' is an inline tag\n", t->nd.name.data ());
-                      if (q.empty ())
-                        {
-                          get_error () = EQ_HP_INVALID_CLOSING_TAG;
-                          return;
-                        }
 
                       Node::add_next (q.top (), t);
                     }
@@ -354,6 +360,7 @@ HTMLParser::build_tree ()
                     {
                       LOG ("tag '%s' is not an inline tag\n",
                            t->nd.name.data ());
+
                       q.push (t);
                     }
                 }
@@ -365,6 +372,16 @@ HTMLParser::build_tree ()
 
               if (get_error ())
                 return;
+
+              if (q.empty ())
+                {
+                  get_error () = EQ_HP_INVALID_CLOSING_TAG;
+                  return;
+                }
+
+              n->parent = q.top ();
+              q.top ()->children.push_back (n);
+              Node::add_next (q.top (), n);
             }
         }
     }
@@ -373,5 +390,53 @@ HTMLParser::build_tree ()
       get_error () = HTMLParser::EQ_HP_INVALID_SYNTAX;
       return;
     }
+}
+
+std::vector<Node *>
+HTMLParser::get_tag_fromname (std::string s)
+{
+  std::vector<Node *> r;
+
+  Node *n = root;
+  while (n != nullptr)
+    {
+      if (n->nd.name == s)
+        r.push_back (n);
+
+      n = n->next;
+    }
+
+  return r;
+}
+
+Node *
+HTMLParser::get_tag_fromstr (std::string v)
+{
+  std::vector<std::string> v_sp;
+
+  size_t rf = 0;
+  size_t lr = 0;
+  while ((rf = v.find (' ', rf + 1)) != std::string::npos)
+    {
+      v_sp.push_back (v.substr (lr, rf - lr));
+      lr = rf + 1;
+    }
+
+  v_sp.push_back (v.substr (lr, rf - lr));
+
+  for (auto &i : v_sp)
+    {
+      LOG ("processing '%s'\n", i.data ());
+    }
+
+  size_t ti = 0;
+  std::vector<Node *> tagvs = get_tag_fromname (v_sp[0]);
+
+  for (Node *&i : tagvs)
+    {
+      /* TODO */
+    }
+
+  return nullptr;
 }
 } // namespace equinox

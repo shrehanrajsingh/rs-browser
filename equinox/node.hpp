@@ -13,10 +13,13 @@ class Node
 {
 public:
   Node *next;
+  Node *parent;
   NodeData nd;
 
-  Node () : next{ nullptr } {}
-  Node (Node *_Next) : next{ nullptr } {}
+  std::vector<Node *> children;
+
+  Node () : next{ nullptr }, parent{ nullptr } {}
+  Node (Node *_Next) : next{ nullptr }, parent{ nullptr } {}
 
   static void add_next (Node *, Node *);
 
