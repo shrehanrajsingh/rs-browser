@@ -264,6 +264,7 @@ HTMLParser::_parser_make_text_tag ()
     tval.push_back (*rdp++); /* keep it simple */
 
   LOG ("parsed [text] with value = '%s'\n", tval.data ());
+  n->nd.set_attr ("_", tval);
 
   return n;
 }

@@ -3,11 +3,12 @@
 const std::string html = R"(
     <html>
         <head>
-            <title id=1>Hello</title>
+            <title id=1 style="background: red;">Hello</title>
         </head>
 
         <body>
             <h1>Hello</h1>
+            <h1>Hi</h1>
         </body>
     </html>
 )";
@@ -27,7 +28,7 @@ main (int argc, char const *argv[])
       n = n->next;
     }
 
-  std::vector<Node *> h = hp.get_tag_fromstr ("html body h1");
+  std::vector<Node *> h = hp.get_tag_fromstr ("html body h1 [text]");
 
   for (auto &&i : h)
     {
