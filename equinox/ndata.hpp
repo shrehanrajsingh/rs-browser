@@ -5,12 +5,9 @@
 
 namespace equinox
 {
+
 /**
- * Every Node has an associated
- * NodeData structure that stores:
- * 1) Tag Name
- * 2) Attributes
- * 3) Some other metadata
+ * @brief Stores tag name, attributes, and inline metadata.
  */
 class NodeData
 {
@@ -20,9 +17,22 @@ public:
 
   bool is_inline_elem;
 
+  /**
+   * @brief Construct empty node data.
+   */
   NodeData () : is_inline_elem{ false } {}
+  /**
+   * @brief Construct node data with a tag name.
+   * @param _Name Tag name.
+   */
   NodeData (std::string _Name) : name{ _Name }, is_inline_elem{ false } {}
 
+  /**
+   * @brief Get an attribute value by key.
+   * @param s Attribute key.
+   * @return Reference to the attribute value.
+   * @throws std::invalid_argument When the attribute is missing.
+   */
   inline std::string &
   get_attr (std::string s)
   {
@@ -32,14 +42,25 @@ public:
     return attrs[s];
   }
 
+  /**
+   * @brief Set or overwrite an attribute.
+   * @param k Attribute key.
+   * @param v Attribute value.
+   */
   inline void
   set_attr (std::string k, std::string v)
   {
     attrs[k] = v;
   }
 
+  /**
+   * @brief Print this node's data.
+   */
   void print ();
 
+  /**
+   * @brief Destroy the node data.
+   */
   ~NodeData () {}
 };
 } // namespace equinox
