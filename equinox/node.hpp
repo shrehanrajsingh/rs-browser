@@ -7,7 +7,10 @@
 namespace equinox
 {
 /**
- * Linked list
+ * @brief Node in a linked structure with parent/child relationships.
+ *
+ * Stores a pointer to the next node in a list, a pointer to the parent
+ * node, associated data, and a collection of child nodes.
  */
 class Node
 {

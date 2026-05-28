@@ -5,6 +5,13 @@
 
 namespace equinox
 {
+/**
+ * Every Node has an associated
+ * NodeData structure that stores:
+ * 1) Tag Name
+ * 2) Attributes
+ * 3) Some other metadata
+ */
 class NodeData
 {
 public:
