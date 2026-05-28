@@ -8,6 +8,9 @@ class QTabWidget;
 
 namespace rs
 {
+/**
+ * @brief Main window hosting tabbed browser views.
+ */
 class w_browser : public QMainWindow
 {
 private:
@@ -16,9 +19,18 @@ private:
   equinox::HTMLParser new_tab_html;
 
 public:
+  /**
+   * @brief Construct the main browser window.
+   */
   w_browser ();
+  /**
+   * @brief Destroy the main window.
+   */
   ~w_browser () = default;
 
+  /**
+   * @brief Add a new browser tab.
+   */
   void add_tab ();
 };
 } // namespace rs
