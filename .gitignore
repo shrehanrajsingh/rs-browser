@@ -48,3 +48,7 @@ compile_commands.json
 
 # Misc
 .cache/
+
+html/
+latex/
+docs_build/

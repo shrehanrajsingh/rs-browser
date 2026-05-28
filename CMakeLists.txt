@@ -38,7 +38,7 @@ add_executable(
     w_browser.hpp w_browser.cpp
     v_browser.hpp v_browser.cpp
     header.hpp
-    main.cpp)
+    main.hpp main.cpp)
 
 target_link_libraries(rsbrowser PRIVATE 
     mimalloc
