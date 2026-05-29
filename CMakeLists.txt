@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(rsbrowser VERSION 0.1.0 LANGUAGES C CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
