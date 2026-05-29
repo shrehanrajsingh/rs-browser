@@ -455,6 +455,118 @@ v_browser::build_widget (equinox::Node *n)
       return label;
     }
 
+  if (tn == "div")
+    {
+      LOG ("saw 'div' tag\n");
+      std::string attr_style = "";
+
+      try
+        {
+          LOG ("div has a 'style' attribute\n");
+          attr_style = n->nd.get_attr ("style");
+        }
+      catch (const std::exception &e)
+        {
+        }
+
+      if (attr_style[0] == '\"' || attr_style[0] == '\'')
+        attr_style = attr_style.substr (1, attr_style.size () - 2);
+
+      if (attr_style.size ())
+        {
+          auroral::CSSParser ap
+              = auroral::CSSParser::parse_inline (attr_style);
+
+          LOG ("inline css styles:\n");
+          for (auto &&i : ap.nodes->mp)
+            LOG ("%s\n", i.first.data ());
+
+          if (ap.nodes->has_key ("display"))
+            {
+              std::string disp = ap.nodes->get_ifstr ("display");
+              LOG ("div has a 'display' style (= '%s')\n", disp.data ());
+
+              if (disp == "flex")
+                {
+                  std::string fd = "row";
+
+                  if (ap.nodes->has_key ("flex-direction"))
+                    {
+                      fd = ap.nodes->get_ifstr ("flex-direction");
+                    }
+
+                  LOG ("flex type = '%s'\n", fd.data ());
+
+                  auto *container = new QWidget ();
+                  QLayout *layout = nullptr;
+                  if (fd == "column")
+                    layout = new QVBoxLayout (container);
+                  else
+                    layout = new QHBoxLayout (container);
+
+                  layout->setAlignment (Qt::AlignTop);
+
+                  QWidget *inline_container = nullptr;
+                  QHBoxLayout *inline_row = nullptr;
+                  for (auto &i : n->children)
+                    {
+                      QWidget *iw = build_widget (i);
+
+                      if (i->nd.name == "br")
+                        {
+                          if (inline_row)
+                            {
+                              inline_row->addStretch ();
+                            }
+
+                          inline_row = nullptr;
+                          inline_container = nullptr;
+                        }
+
+                      if (!iw)
+                        continue;
+
+                      if (i->nd.name == "img" || i->nd.name == "input"
+                          || i->nd.name == "label")
+                        {
+                          if (!inline_row)
+                            {
+                              inline_container = new QWidget ();
+
+                              inline_container->setSizePolicy (
+                                  QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+                              inline_row = new QHBoxLayout (inline_container);
+                              inline_row->setAlignment (Qt::AlignLeft
+                                                        | Qt::AlignTop);
+                              inline_row->setSpacing (8);
+                              inline_row->setContentsMargins (0, 0, 0, 0);
+
+                              if (fd == "row")
+                                static_cast<QHBoxLayout *> (layout)
+                                    ->addWidget (inline_container, 0,
+                                                 Qt::AlignLeft);
+                              else
+                                static_cast<QVBoxLayout *> (layout)
+                                    ->addWidget (inline_container, 0,
+                                                 Qt::AlignLeft);
+                            }
+
+                          inline_row->addWidget (iw, 0, Qt::AlignBottom);
+                        }
+                      else
+                        {
+                          inline_row = nullptr;
+                          layout->addWidget (iw);
+                        }
+                    }
+
+                  return container;
+                }
+            }
+        }
+    }
+
   return nullptr;
 }
 

@@ -36,4 +36,19 @@
 // HTML Engine (Equinox)
 #include "equinox/equinox.hpp"
 
+// CSS Engine (Auroral)
+#include "auroral/auroral.hpp"
+
+#ifndef here
+#define here std::printf ("%s (%s): %d\n", __FILE__, __FUNCTION__, __LINE__);
+#endif
+
+#ifndef LOG
+#define LOG(...)                                                              \
+  {                                                                           \
+    std::printf ("[LOG] (%s:%d) ", __FUNCTION__, __LINE__);                   \
+    std::printf (__VA_ARGS__);                                                \
+  }
+#endif
+
 #endif // HEADER_H
