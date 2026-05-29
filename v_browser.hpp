@@ -5,6 +5,16 @@
 
 namespace rs
 {
+class __v_browser_meta
+{
+public:
+  int height;
+  int width;
+
+  __v_browser_meta () {}
+  ~__v_browser_meta () {}
+};
+
 /**
  * @brief Qt widget that renders a view from an HTML parse tree.
  */
@@ -13,6 +23,7 @@ class v_browser : public QWidget
 private:
   int m_id;
   equinox::HTMLParser &tree;
+  __v_browser_meta *meta = nullptr;
 
 public:
   /**
@@ -21,7 +32,9 @@ public:
    * @param _Tree HTML parser providing the tree to render.
    * @param parent Optional parent widget.
    */
-  v_browser (int id, equinox::HTMLParser &_Tree, QWidget *parent = nullptr);
+  v_browser (int id, equinox::HTMLParser &_Tree,
+             __v_browser_meta *_Meta = nullptr, QWidget *parent = nullptr);
+
   /**
    * @brief Destroy the widget.
    */

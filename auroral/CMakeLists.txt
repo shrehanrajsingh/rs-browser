@@ -19,6 +19,7 @@ add_library(
     s_width.hpp
     parser.hpp parser.cpp
     css_node.hpp css_node.cpp
+    css_scale.hpp css_scale.cpp
 )
 
 target_link_libraries(auroral PRIVATE mimalloc)

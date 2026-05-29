@@ -2,6 +2,7 @@
 #define AURORAL_H
 
 #include "css_node.hpp"
+#include "css_scale.hpp"
 #include "header.hpp"
 #include "parser.hpp"
 

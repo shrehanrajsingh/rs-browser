@@ -150,6 +150,10 @@ HTMLParser::_parser_parse_attr (Node *n)
   if (std::isspace (static_cast<unsigned char> (*rdp)) || *rdp == '>')
     {
       LOG ("attribute '%s' has no value\n", key.data ());
+
+      if (val[0] == '\'' || val[0] == '\"')
+        val = val.substr (1, val.size () - 2);
+
       n->nd.set_attr (key, val);
       return;
     }
@@ -214,6 +218,9 @@ HTMLParser::_parser_parse_attr (Node *n)
             }
 
           LOG ("attribute '%s' has value = %s\n", key.data (), val.data ());
+
+          if (val[0] == '\'' || val[0] == '\"')
+            val = val.substr (1, val.size () - 2);
           n->nd.set_attr (key, val);
         }
       else

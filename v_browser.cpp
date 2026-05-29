@@ -8,8 +8,26 @@
 
 namespace rs
 {
-v_browser::v_browser (int id, equinox::HTMLParser &_Tree, QWidget *parent)
-    : QWidget (parent), m_id (id), tree{ _Tree }
+std::string
+_str_trim (std::string v)
+{
+  size_t i = 0;
+
+  while (std::isspace (static_cast<unsigned char> (v[i])))
+    i++;
+
+  if (i == v.size ())
+    return std::string{ "" };
+
+  while (std::isspace (static_cast<unsigned char> (v.back ())))
+    v.pop_back ();
+
+  return v.substr (i);
+}
+
+v_browser::v_browser (int id, equinox::HTMLParser &_Tree,
+                      __v_browser_meta *_Meta, QWidget *parent)
+    : QWidget (parent), m_id (id), tree{ _Tree }, meta{ _Meta }
 {
   auto *rt_layout = new QVBoxLayout (this); /* root layotu */
 
@@ -90,6 +108,11 @@ v_browser::build_widget (equinox::Node *n)
   if (tn == "body")
     {
       auto *container = new QWidget ();
+      container->setStyleSheet (R"(
+          padding: 0;
+          margin: 0;
+        )");
+
       auto *layout = new QVBoxLayout (container);
 
       layout->setAlignment (Qt::AlignTop);
@@ -458,19 +481,22 @@ v_browser::build_widget (equinox::Node *n)
   if (tn == "div")
     {
       LOG ("saw 'div' tag\n");
-      std::string attr_style = "";
 
-      try
-        {
-          LOG ("div has a 'style' attribute\n");
-          attr_style = n->nd.get_attr ("style");
-        }
-      catch (const std::exception &e)
-        {
-        }
+      std::string attr_style = "", attr_width = "", attr_height = "",
+                  attr_border = "";
 
       if (attr_style[0] == '\"' || attr_style[0] == '\'')
         attr_style = attr_style.substr (1, attr_style.size () - 2);
+
+      try
+        {
+          attr_style = n->nd.get_attr ("style");
+          LOG ("div has a 'style' attribute\n");
+        }
+      catch (const std::exception &e)
+        {
+          /* do nothing */
+        }
 
       if (attr_style.size ())
         {
@@ -481,6 +507,27 @@ v_browser::build_widget (equinox::Node *n)
           for (auto &&i : ap.nodes->mp)
             LOG ("%s\n", i.first.data ());
 
+          if (ap.nodes->has_key ("width"))
+            {
+              attr_width = _str_trim (ap.nodes->get_ifstr ("width"));
+              LOG ("div has a 'width' attribute (= '%s')\n",
+                   attr_width.data ());
+            }
+
+          if (ap.nodes->has_key ("height"))
+            {
+              attr_height = _str_trim (ap.nodes->get_ifstr ("height"));
+              LOG ("div has a 'height' attribute (= '%s')\n",
+                   attr_height.data ());
+            }
+
+          if (ap.nodes->has_key ("border"))
+            {
+              attr_border = _str_trim (ap.nodes->get_ifstr ("border"));
+              LOG ("div has a 'border' attribute (= '%s')\n",
+                   attr_border.data ());
+            }
+
           if (ap.nodes->has_key ("display"))
             {
               std::string disp = ap.nodes->get_ifstr ("display");
@@ -490,21 +537,113 @@ v_browser::build_widget (equinox::Node *n)
                 {
                   std::string fd = "row";
 
+                  std::string attr_justify_content = "flex-start",
+                              attr_align_items = "stretch";
+
                   if (ap.nodes->has_key ("flex-direction"))
                     {
                       fd = ap.nodes->get_ifstr ("flex-direction");
                     }
 
+                  if (ap.nodes->has_key ("justify-content"))
+                    {
+                      attr_justify_content
+                          = ap.nodes->get_ifstr ("justify-content");
+                    }
+
+                  if (ap.nodes->has_key ("align-items"))
+                    {
+                      attr_align_items = ap.nodes->get_ifstr ("align-items");
+                    }
+
                   LOG ("flex type = '%s'\n", fd.data ());
 
                   auto *container = new QWidget ();
+
+                  if (attr_border.size ())
+                    {
+                      unsigned long long rcc = random ();
+                      std::string st_rcc
+                          = std::string{ "__rsb_Flex_Container_" }
+                            + std::to_string (rcc);
+
+                      container->setObjectName (st_rcc);
+
+                      container->setStyleSheet (
+                          QString (("#" + st_rcc + " { border: %1; }").data ())
+                              .arg (QString::fromStdString (attr_border)));
+                    }
+
+                  if (attr_height.size ())
+                    {
+                      auroral::css_scale_unit cu
+                          = auroral::css_scale_unit::parse_type (attr_height);
+
+                      switch (cu.type)
+                        {
+                        case auroral::AURORAL_CSS_SCALE_PX:
+                          container->setFixedHeight (cu.value);
+                          break;
+
+                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
+                          container->setFixedHeight (cu.value * meta->height
+                                                     / 100);
+                          break;
+
+                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
+                          container->setFixedHeight (cu.value * meta->width
+                                                     / 100);
+                          break;
+
+                        default:
+                          break;
+                        }
+                    }
+
+                  if (attr_width.size ())
+                    {
+                      auroral::css_scale_unit cu
+                          = auroral::css_scale_unit::parse_type (attr_width);
+
+                      switch (cu.type)
+                        {
+                        case auroral::AURORAL_CSS_SCALE_PX:
+                          container->setFixedWidth (cu.value);
+                          break;
+
+                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
+                          container->setFixedWidth (cu.value * meta->height
+                                                    / 100);
+                          break;
+
+                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
+                          container->setFixedWidth (cu.value * meta->width
+                                                    / 100);
+                          break;
+
+                        default:
+                          break;
+                        }
+                    }
+
                   QLayout *layout = nullptr;
                   if (fd == "column")
                     layout = new QVBoxLayout (container);
                   else
                     layout = new QHBoxLayout (container);
 
-                  layout->setAlignment (Qt::AlignTop);
+                  Qt::Alignment a;
+                  if (attr_justify_content == "flex-start")
+                    a |= Qt::AlignLeft;
+                  else if (attr_justify_content == "center")
+                    a |= Qt::AlignCenter;
+                  else if (attr_justify_content == "flex-end")
+                    a |= Qt::AlignRight;
+
+                  if (attr_align_items == "center")
+                    a |= Qt::AlignVCenter;
+
+                  layout->setAlignment (a);
 
                   QWidget *inline_container = nullptr;
                   QHBoxLayout *inline_row = nullptr;
@@ -558,6 +697,14 @@ v_browser::build_widget (equinox::Node *n)
                         {
                           inline_row = nullptr;
                           layout->addWidget (iw);
+                        }
+
+                      if (attr_justify_content == "space-between")
+                        {
+                          if (fd == "row")
+                            static_cast<QHBoxLayout *> (layout)->addStretch ();
+                          else
+                            static_cast<QVBoxLayout *> (layout)->addStretch ();
                         }
                     }
 
