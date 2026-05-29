@@ -1,5 +1,5 @@
-#if !defined(EQUINOX_HEADER_H)
-#define EQUINOX_HEADER_H
+#if !defined(AURORAL_HEADER_H)
+#define AURORAL_HEADER_H
 
 #include <cassert>
 #include <cctype>
@@ -30,4 +30,4 @@
   }
 #endif
 
-#endif // EQUINOX_HEADER_H
+#endif // AURORAL_HEADER_H

@@ -32,6 +32,7 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Network Sql Xml)
 
 add_subdirectory(equinox)
+add_subdirectory(auroral)
 
 add_executable(
     rsbrowser
@@ -48,4 +49,5 @@ target_link_libraries(rsbrowser PRIVATE
     Qt6::Network
     Qt6::Sql
     Qt6::Xml
-    equinox)
+    equinox
+    auroral)
