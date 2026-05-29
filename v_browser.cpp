@@ -314,6 +314,131 @@ v_browser::build_widget (equinox::Node *n)
 
           return input;
         }
+
+      else if (inp_type == "checkbox")
+        {
+          auto *input = new QCheckBox ();
+          input->setMinimumSize (40, 30);
+
+          input->setStyleSheet (R"(
+              QCheckBox::indicator {
+                  width: 20px;
+                  height: 20px;
+
+                  border: 1px solid #888;
+                  border-radius: 4px;
+
+                  background: white;
+              }
+
+              QCheckBox::indicator:checked {
+                  background: #0078d7;
+
+                  image: url(../resources/checkmark.png);
+              }
+            )");
+
+          return input;
+        }
+
+      else if (inp_type == "radio")
+        {
+          auto *input = new QRadioButton ();
+          input->setMinimumSize (40, 30);
+
+          input->setStyleSheet (R"(
+              QRadioButton::indicator {
+                  width: 20px;
+                  height: 20px;
+
+                  border: 1px solid #888;
+                  border-radius: 10px;
+
+                  background: white;
+              }
+
+              QRadioButton::indicator:checked {
+                  background: #0078d7;
+
+                  image: url(../resources/radio.png);
+              }
+            )");
+
+          return input;
+        }
+
+      else if (inp_type == "date")
+        {
+          auto *input = new QDateEdit ();
+
+          input->setStyleSheet (R"(
+            QDateEdit {
+              background: rgb(230,230,230);
+              color: black;
+              border: none;
+              border-radius: 8px;
+              padding: 6px 10px;
+              font-size: 14px;
+            }
+
+            QDateEdit::up-button {
+                width: 18px;
+                border-left: 1px solid #c0c0c0;
+                background: #f5f5f5;
+                image: url(../resources/up-arrow.png);
+            }
+
+            QDateEdit::down-button {
+                width: 18px;
+                border-left: 1px solid #c0c0c0;
+                background: #f5f5f5;
+                image: url(../resources/down-arrow.png);
+            }
+
+            QDateEdit::up-button:hover,
+            QDateEdit::down-button:hover {
+                background: #e5e5e5;
+            }
+          )");
+
+          return input;
+        }
+      else if (inp_type == "datetime")
+        {
+          auto *input = new QDateTimeEdit ();
+
+          input->setStyleSheet (R"(
+            QDateTimeEdit {
+              background: rgb(230,230,230);
+              color: black;
+              border: none;
+              border-radius: 8px;
+              padding: 6px 10px;
+              font-size: 14px;
+            }
+
+            QDateTimeEdit::up-button {
+                width: 18px;
+                border-left: 1px solid #c0c0c0;
+                background: #f5f5f5;
+                image: url(../resources/up-arrow.png);
+            }
+
+            QDateTimeEdit::down-button {
+                width: 18px;
+                border-left: 1px solid #c0c0c0;
+                background: #f5f5f5;
+                image: url(../resources/down-arrow.png);
+            }
+
+            QDateTimeEdit::up-button:hover,
+            QDateTimeEdit::down-button:hover {
+                background: #e5e5e5;
+            }
+          )");
+
+          return input;
+        }
     }
 
   if (tn == "label")
