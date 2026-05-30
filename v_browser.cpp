@@ -90,12 +90,6 @@ v_browser::v_browser (int id, equinox::HTMLParser &_Tree,
 
   // page_content->setAlignment (Qt::AlignCenter);
 
-  page_content->setStyleSheet (R"(
-      background: white;
-      color: black;
-      font-size: 32px;
-  )");
-
   rt_layout->addWidget (top_bar, 1);
   rt_layout->addWidget (page_content, 15);
 }
@@ -108,12 +102,40 @@ v_browser::build_widget (equinox::Node *n)
   if (tn == "body")
     {
       auto *container = new QWidget ();
+
+      container->setAutoFillBackground (true);
+      container->setAttribute (Qt::WA_StyledBackground, true);
+
       container->setStyleSheet (R"(
           padding: 0;
           margin: 0;
+          color: black;
+          font-size: 32px;
         )");
 
+      std::string attr_style = "";
+
+      try
+        {
+          attr_style = n->nd.get_attr ("style");
+        }
+      catch (const std::exception &e)
+        {
+        }
+
       auto *layout = new QVBoxLayout (container);
+
+      if (attr_style.size ())
+        {
+          LOG ("body style = %s\n", attr_style.data ());
+          unsigned long long rcc = RAND_COUNT++;
+          std::string rid = "__rsb_Body_TAG_" + std::to_string (rcc);
+
+          container->setObjectName (rid);
+
+          container->setStyleSheet (
+              QString::fromStdString ("#" + rid + " {" + attr_style + "}"));
+        }
 
       layout->setAlignment (Qt::AlignTop);
 
@@ -138,7 +160,7 @@ v_browser::build_widget (equinox::Node *n)
             continue;
 
           if (i->nd.name == "img" || i->nd.name == "input"
-              || i->nd.name == "label")
+              || i->nd.name == "label" || i->nd.name == "button")
             {
               if (!inline_row)
                 {
@@ -171,6 +193,8 @@ v_browser::build_widget (equinox::Node *n)
     {
       auto *label = new QLabel (QString::fromStdString (n->get_text ()));
 
+      label->setAttribute (Qt::WA_TranslucentBackground);
+
       if (tn == "h1")
         label->setStyleSheet (R"(
           font-size: 32px;
@@ -201,6 +225,28 @@ v_browser::build_widget (equinox::Node *n)
           font-size: 10px;
           font-weight: bold;
         )");
+
+      std::string attr_style = "";
+
+      try
+        {
+          attr_style = n->nd.get_attr ("style");
+        }
+      catch (const std::exception &e)
+        {
+          std::cerr << e.what () << '\n';
+        }
+
+      if (attr_style.size ())
+        {
+          unsigned long long rcc = RAND_COUNT++;
+          std::string rid = "__rsb_TAG_" + tn + "_" + std::to_string (rcc);
+
+          label->setObjectName (rid);
+
+          label->setStyleSheet (
+              QString::fromStdString ("#" + rid + " {" + attr_style + "}"));
+        }
 
       label->setAlignment (Qt::AlignLeft | Qt::AlignTop);
       label->setSizePolicy (QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -307,6 +353,7 @@ v_browser::build_widget (equinox::Node *n)
   if (tn == "input")
     {
       std::string inp_type = "";
+      std::string attr_style = "";
 
       try
         {
@@ -317,23 +364,60 @@ v_browser::build_widget (equinox::Node *n)
           inp_type = "text"; /* fallback */
         }
 
+      try
+        {
+          attr_style = n->nd.get_attr ("style");
+        }
+      catch (const std::exception &e)
+        {
+          std::cerr << e.what () << '\n';
+        }
+
       if (inp_type[0] == '\"' || inp_type[0] == '\'')
         inp_type = inp_type.substr (1, inp_type.size () - 2);
 
       if (inp_type == "text")
         {
+          std::string attr_placeholder = "";
+
+          try
+            {
+              attr_placeholder = n->nd.get_attr ("placeholder");
+            }
+          catch (const std::exception &e)
+            {
+            }
+
           auto *input = new QLineEdit ();
 
-          input->setStyle (QStyleFactory::create ("Fusion"));
-          input->setStyleSheet (R"(
-              QLineEdit {
-                background-color: white;
-                color: #000;
-                font-size: 14px;
-              }
-            )");
+          if (attr_placeholder.size ())
+            {
+              input->setPlaceholderText (
+                  QString::fromStdString (attr_placeholder));
+            }
 
-          input->setFixedWidth (250);
+          input->setStyle (QStyleFactory::create ("Fusion"));
+
+          input->setFrame (false);
+          input->setAttribute (Qt::WA_MacShowFocusRect, false);
+
+          input->setMinimumWidth (250);
+
+          if (attr_style.size ())
+            {
+              unsigned long long rcc = RAND_COUNT++;
+              std::string rid = "__rsb_Input_Text_" + std::to_string (rcc);
+
+              input->setObjectName (rid);
+
+              input->setStyleSheet (
+                  QString::fromStdString ("#" + rid + " {" + attr_style + R"(
+                    ;background-color: white;
+                    color: #000;
+                    font-size: 14px;
+                  }
+              )"));
+            }
 
           return input;
         }
@@ -468,6 +552,8 @@ v_browser::build_widget (equinox::Node *n)
     {
       auto *label = new QLabel (QString::fromStdString (n->get_text ()));
 
+      label->setAttribute (Qt::WA_TranslucentBackground);
+
       label->setStyleSheet (R"(
           font-size: 16px;
         )");
@@ -560,9 +646,11 @@ v_browser::build_widget (equinox::Node *n)
 
                   auto *container = new QWidget ();
 
+                  container->setAttribute (Qt::WA_TranslucentBackground);
+
                   if (attr_border.size ())
                     {
-                      unsigned long long rcc = random ();
+                      unsigned long long rcc = /* random () */ RAND_COUNT++;
                       std::string st_rcc
                           = std::string{ "__rsb_Flex_Container_" }
                             + std::to_string (rcc);
@@ -681,6 +769,9 @@ v_browser::build_widget (equinox::Node *n)
                               inline_row->setSpacing (8);
                               inline_row->setContentsMargins (0, 0, 0, 0);
 
+                              inline_container->setStyleSheet (
+                                  "background: transparent;");
+
                               if (fd == "row")
                                 static_cast<QHBoxLayout *> (layout)
                                     ->addWidget (inline_container, 0,
@@ -714,7 +805,31 @@ v_browser::build_widget (equinox::Node *n)
         }
     }
 
+  if (tn == "button")
+    {
+      auto *btn = new QPushButton ();
+      btn->setText (QString::fromStdString (n->get_text ()));
+      btn->setCursor (Qt::PointingHandCursor);
+
+      std::string attr_style = R"(
+        background: #d1caca;
+        border-radius: 4px;
+        color: black;
+      )";
+
+      try
+        {
+          attr_style += n->nd.get_attr ("style");
+        }
+      catch (const std::exception &e)
+        {
+        }
+
+      btn->setStyleSheet (QString::fromStdString (attr_style));
+
+      return btn;
+    }
+
   return nullptr;
 }
-
 };

@@ -17,6 +17,7 @@ private:
   QTabWidget *m_tabs;
 
   equinox::HTMLParser new_tab_html;
+  __v_browser_meta *vbm = nullptr;
 
 public:
   /**

@@ -106,11 +106,14 @@ w_browser::add_tab ()
 {
   int id = m_tabs->count () + 1;
 
-  __v_browser_meta *m = new __v_browser_meta ();
-  m->height = height ();
-  m->width = width ();
+  if (vbm == nullptr)
+    {
+      vbm = new __v_browser_meta ();
+      vbm->height = height ();
+      vbm->width = width ();
+    }
 
-  v_browser *view = new v_browser (id, new_tab_html, m);
+  v_browser *view = new v_browser (id, new_tab_html, vbm);
 
   std::vector<equinox::Node *> tv = new_tab_html.get_tag_fromname ("title");
 

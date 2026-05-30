@@ -12,6 +12,8 @@
  * default "new tab" page loaded from resources/home.html.
  *
  * \image html docs/images/view.png "RSBrowser UI" width=1000px
+ * \image html docs/images/view2.png "Defying the limits" width=1000px
+ *
  *
  * \section intro_sec Introduction
  * RSBrowser is a learning-oriented browser experiment. It focuses on a simple

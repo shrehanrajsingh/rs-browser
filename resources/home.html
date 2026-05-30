@@ -3,20 +3,53 @@
     <title>New Tab</title>
   </head>
 
-  <body>
+  <body style="image: url(../resources/scene.jpg)">
     <div
       style="
         display: flex;
         flex-direction: column;
         width: 100vw;
         height: 100vh;
-        border: 1px solid black;
         align-items: center;
         justify-content: center;
       "
     >
-      <h1>RSSearch</h1>
-      <input type="text" />
+      <h1
+        style="
+          qproperty-alignment: AlignCenter;
+          font-size: 48px;
+          margin-bottom: 20px;
+          color: rgb(50, 58, 147);
+          font-weight: 800;
+        "
+      >
+        RS-Browser
+      </h1>
+      <div style="display: flex; flex-direction: row">
+        <input
+          type="text"
+          style="
+            width: 600px;
+            height: 30px;
+            padding: 4px 0 4px 8px;
+            border-radius: 10px;
+          "
+          placeholder="Ask away..."
+        />
+        <button>Search</button>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <button>I'm feeling lucky</button>
+        <button>Star please</button>
+      </div>
     </div>
   </body>
 </html>

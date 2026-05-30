@@ -25,6 +25,8 @@ private:
   equinox::HTMLParser &tree;
   __v_browser_meta *meta = nullptr;
 
+  unsigned long long RAND_COUNT = 0;
+
 public:
   /**
    * @brief Construct a view browser widget.
