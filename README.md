@@ -123,5 +123,4 @@ resources/home.html content you used.
 
 ## Copying
 
-No license file is present in this repository. If you intend to redistribute or
-reuse this code, please contact the repository owner to clarify licensing terms.
+See [LICENSE](LICENSE)
