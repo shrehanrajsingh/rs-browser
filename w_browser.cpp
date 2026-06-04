@@ -122,4 +122,22 @@ w_browser::add_tab ()
   else
     m_tabs->addTab (view, QString (tv[0]->get_text ().data ()));
 }
+
+void
+w_browser::resizeEvent (QResizeEvent *e)
+{
+  QWidget::resizeEvent (e);
+
+  if (vbm == nullptr)
+    {
+      vbm->height = height ();
+      vbm->width = width ();
+    }
+  else
+    {
+      vbm = new __v_browser_meta ();
+      vbm->height = height ();
+      vbm->width = width ();
+    }
+}
 } // namespace rs

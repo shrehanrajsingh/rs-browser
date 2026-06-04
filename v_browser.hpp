@@ -27,6 +27,11 @@ private:
 
   unsigned long long RAND_COUNT = 0;
 
+  QVBoxLayout *rt_layout;
+  QWidget *page_content;
+
+  QTimer *timer;
+
 public:
   /**
    * @brief Construct a view browser widget.
@@ -48,6 +53,10 @@ public:
    * @return Newly created widget.
    */
   QWidget *build_widget (equinox::Node *);
+
+  void relayout_page ();
+
+  void resizeEvent (QResizeEvent *);
 
 protected:
   // void paintEvent (QPaintEvent *) override;

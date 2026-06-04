@@ -33,6 +33,7 @@ public:
    * @brief Add a new browser tab.
    */
   void add_tab ();
+  void resizeEvent (QResizeEvent *);
 };
 } // namespace rs
 

@@ -29,7 +29,13 @@ v_browser::v_browser (int id, equinox::HTMLParser &_Tree,
                       __v_browser_meta *_Meta, QWidget *parent)
     : QWidget (parent), m_id (id), tree{ _Tree }, meta{ _Meta }
 {
-  auto *rt_layout = new QVBoxLayout (this); /* root layotu */
+  rt_layout = new QVBoxLayout (this);
+
+  timer = new QTimer (this);
+
+  timer->setSingleShot (true);
+
+  connect (timer, &QTimer::timeout, this, &v_browser::relayout_page);
 
   rt_layout->setContentsMargins (0, 0, 0, 0);
   rt_layout->setSpacing (0);
@@ -86,7 +92,7 @@ v_browser::v_browser (int id, equinox::HTMLParser &_Tree,
   top_layout->addWidget (btn_refresh, 1);
   top_layout->addWidget (address_bar, 37);
 
-  auto *page_content = build_widget (tree.get_tag_fromname ("body")[0]);
+  page_content = build_widget (tree.get_tag_fromname ("body")[0]);
 
   // page_content->setAlignment (Qt::AlignCenter);
 
@@ -662,6 +668,9 @@ v_browser::build_widget (equinox::Node *n)
                               .arg (QString::fromStdString (attr_border)));
                     }
 
+                  container->setSizePolicy (QSizePolicy::Expanding,
+                                            QSizePolicy::Expanding);
+
                   if (attr_height.size ())
                     {
                       auroral::css_scale_unit cu
@@ -696,17 +705,17 @@ v_browser::build_widget (equinox::Node *n)
                       switch (cu.type)
                         {
                         case auroral::AURORAL_CSS_SCALE_PX:
-                          container->setFixedWidth (cu.value);
+                          container->resize (cu.value, container->height ());
                           break;
 
                         case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
-                          container->setFixedWidth (cu.value * meta->height
-                                                    / 100);
+                          container->resize (container->width (),
+                                             cu.value * meta->height / 100);
                           break;
 
                         case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
-                          container->setFixedWidth (cu.value * meta->width
-                                                    / 100);
+                          container->resize (cu.value * meta->width / 100,
+                                             container->height ());
                           break;
 
                         default:
@@ -720,7 +729,7 @@ v_browser::build_widget (equinox::Node *n)
                   else
                     layout = new QHBoxLayout (container);
 
-                  Qt::Alignment a;
+                  Qt::Alignment a = {};
                   if (attr_justify_content == "flex-start")
                     a |= Qt::AlignLeft;
                   else if (attr_justify_content == "center")
@@ -831,5 +840,23 @@ v_browser::build_widget (equinox::Node *n)
     }
 
   return nullptr;
+}
+
+void
+v_browser::relayout_page ()
+{
+  rt_layout->removeWidget (page_content);
+
+  page_content = build_widget (tree.get_tag_fromname ("body")[0]);
+  rt_layout->addWidget (page_content, 15);
+}
+
+void
+v_browser::resizeEvent (QResizeEvent *e)
+{
+  QWidget::resizeEvent (e);
+
+  // relayout_page ();
+  timer->start (3);
 }
 };
