@@ -25,6 +25,41 @@ _str_trim (std::string v)
   return v.substr (i);
 }
 
+static int
+_count_grid_tracks (const std::string &spec)
+{
+  if (spec.empty ())
+    return 1;
+
+  size_t rp = spec.find ("repeat");
+  if (rp != std::string::npos)
+    {
+      size_t lp = spec.find ('(', rp);
+      size_t comma = spec.find (',', lp);
+
+      if (lp != std::string::npos && comma != std::string::npos)
+        {
+          try
+            {
+              int v = std::stoi (
+                  _str_trim (spec.substr (lp + 1, comma - lp - 1)));
+              return v > 0 ? v : 1;
+            }
+          catch (const std::exception &e)
+            {
+            }
+        }
+    }
+
+  int count = 0;
+  std::istringstream iss (spec);
+  std::string tok;
+  while (iss >> tok)
+    count++;
+
+  return count > 0 ? count : 1;
+}
+
 v_browser::v_browser (int id, equinox::HTMLParser &_Tree,
                       __v_browser_meta *_Meta, QWidget *parent)
     : QWidget (parent), m_id (id), tree{ _Tree }, meta{ _Meta }
@@ -575,10 +610,12 @@ v_browser::build_widget (equinox::Node *n)
       LOG ("saw 'div' tag\n");
 
       std::string attr_style = "", attr_width = "", attr_height = "",
-                  attr_border = "";
+                  attr_border = "", attr_display = "block";
 
-      if (attr_style[0] == '\"' || attr_style[0] == '\'')
-        attr_style = attr_style.substr (1, attr_style.size () - 2);
+      std::string fd = "row";
+      std::string attr_justify_content = "flex-start",
+                  attr_align_items = "stretch";
+      std::string attr_gap = "", attr_grid_cols = "";
 
       try
         {
@@ -595,223 +632,165 @@ v_browser::build_widget (equinox::Node *n)
           auroral::CSSParser ap
               = auroral::CSSParser::parse_inline (attr_style);
 
-          LOG ("inline css styles:\n");
-          for (auto &&i : ap.nodes->mp)
-            LOG ("%s\n", i.first.data ());
-
           if (ap.nodes->has_key ("width"))
-            {
-              attr_width = _str_trim (ap.nodes->get_ifstr ("width"));
-              LOG ("div has a 'width' attribute (= '%s')\n",
-                   attr_width.data ());
-            }
+            attr_width = _str_trim (ap.nodes->get_ifstr ("width"));
 
           if (ap.nodes->has_key ("height"))
-            {
-              attr_height = _str_trim (ap.nodes->get_ifstr ("height"));
-              LOG ("div has a 'height' attribute (= '%s')\n",
-                   attr_height.data ());
-            }
+            attr_height = _str_trim (ap.nodes->get_ifstr ("height"));
 
           if (ap.nodes->has_key ("border"))
-            {
-              attr_border = _str_trim (ap.nodes->get_ifstr ("border"));
-              LOG ("div has a 'border' attribute (= '%s')\n",
-                   attr_border.data ());
-            }
+            attr_border = _str_trim (ap.nodes->get_ifstr ("border"));
 
           if (ap.nodes->has_key ("display"))
-            {
-              std::string disp = ap.nodes->get_ifstr ("display");
-              LOG ("div has a 'display' style (= '%s')\n", disp.data ());
+            attr_display = _str_trim (ap.nodes->get_ifstr ("display"));
 
-              if (disp == "flex")
-                {
-                  std::string fd = "row";
+          if (ap.nodes->has_key ("flex-direction"))
+            fd = _str_trim (ap.nodes->get_ifstr ("flex-direction"));
 
-                  std::string attr_justify_content = "flex-start",
-                              attr_align_items = "stretch";
+          if (ap.nodes->has_key ("justify-content"))
+            attr_justify_content
+                = _str_trim (ap.nodes->get_ifstr ("justify-content"));
 
-                  if (ap.nodes->has_key ("flex-direction"))
-                    {
-                      fd = ap.nodes->get_ifstr ("flex-direction");
-                    }
+          if (ap.nodes->has_key ("align-items"))
+            attr_align_items = _str_trim (ap.nodes->get_ifstr ("align-items"));
 
-                  if (ap.nodes->has_key ("justify-content"))
-                    {
-                      attr_justify_content
-                          = ap.nodes->get_ifstr ("justify-content");
-                    }
+          if (ap.nodes->has_key ("gap"))
+            attr_gap = _str_trim (ap.nodes->get_ifstr ("gap"));
 
-                  if (ap.nodes->has_key ("align-items"))
-                    {
-                      attr_align_items = ap.nodes->get_ifstr ("align-items");
-                    }
-
-                  LOG ("flex type = '%s'\n", fd.data ());
-
-                  auto *container = new QWidget ();
-
-                  container->setAttribute (Qt::WA_TranslucentBackground);
-
-                  if (attr_border.size ())
-                    {
-                      unsigned long long rcc = /* random () */ RAND_COUNT++;
-                      std::string st_rcc
-                          = std::string{ "__rsb_Flex_Container_" }
-                            + std::to_string (rcc);
-
-                      container->setObjectName (st_rcc);
-
-                      container->setStyleSheet (
-                          QString (("#" + st_rcc + " { border: %1; }").data ())
-                              .arg (QString::fromStdString (attr_border)));
-                    }
-
-                  container->setSizePolicy (QSizePolicy::Expanding,
-                                            QSizePolicy::Expanding);
-
-                  if (attr_height.size ())
-                    {
-                      auroral::css_scale_unit cu
-                          = auroral::css_scale_unit::parse_type (attr_height);
-
-                      switch (cu.type)
-                        {
-                        case auroral::AURORAL_CSS_SCALE_PX:
-                          container->setFixedHeight (cu.value);
-                          break;
-
-                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
-                          container->setFixedHeight (cu.value * meta->height
-                                                     / 100);
-                          break;
-
-                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
-                          container->setFixedHeight (cu.value * meta->width
-                                                     / 100);
-                          break;
-
-                        default:
-                          break;
-                        }
-                    }
-
-                  if (attr_width.size ())
-                    {
-                      auroral::css_scale_unit cu
-                          = auroral::css_scale_unit::parse_type (attr_width);
-
-                      switch (cu.type)
-                        {
-                        case auroral::AURORAL_CSS_SCALE_PX:
-                          container->resize (cu.value, container->height ());
-                          break;
-
-                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
-                          container->resize (container->width (),
-                                             cu.value * meta->height / 100);
-                          break;
-
-                        case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
-                          container->resize (cu.value * meta->width / 100,
-                                             container->height ());
-                          break;
-
-                        default:
-                          break;
-                        }
-                    }
-
-                  QLayout *layout = nullptr;
-                  if (fd == "column")
-                    layout = new QVBoxLayout (container);
-                  else
-                    layout = new QHBoxLayout (container);
-
-                  Qt::Alignment a = {};
-                  if (attr_justify_content == "flex-start")
-                    a |= Qt::AlignLeft;
-                  else if (attr_justify_content == "center")
-                    a |= Qt::AlignCenter;
-                  else if (attr_justify_content == "flex-end")
-                    a |= Qt::AlignRight;
-
-                  if (attr_align_items == "center")
-                    a |= Qt::AlignVCenter;
-
-                  layout->setAlignment (a);
-
-                  QWidget *inline_container = nullptr;
-                  QHBoxLayout *inline_row = nullptr;
-                  for (auto &i : n->children)
-                    {
-                      QWidget *iw = build_widget (i);
-
-                      if (i->nd.name == "br")
-                        {
-                          if (inline_row)
-                            {
-                              inline_row->addStretch ();
-                            }
-
-                          inline_row = nullptr;
-                          inline_container = nullptr;
-                        }
-
-                      if (!iw)
-                        continue;
-
-                      if (i->nd.name == "img" || i->nd.name == "input"
-                          || i->nd.name == "label")
-                        {
-                          if (!inline_row)
-                            {
-                              inline_container = new QWidget ();
-
-                              inline_container->setSizePolicy (
-                                  QSizePolicy::Preferred, QSizePolicy::Fixed);
-
-                              inline_row = new QHBoxLayout (inline_container);
-                              inline_row->setAlignment (Qt::AlignLeft
-                                                        | Qt::AlignTop);
-                              inline_row->setSpacing (8);
-                              inline_row->setContentsMargins (0, 0, 0, 0);
-
-                              inline_container->setStyleSheet (
-                                  "background: transparent;");
-
-                              if (fd == "row")
-                                static_cast<QHBoxLayout *> (layout)
-                                    ->addWidget (inline_container, 0,
-                                                 Qt::AlignLeft);
-                              else
-                                static_cast<QVBoxLayout *> (layout)
-                                    ->addWidget (inline_container, 0,
-                                                 Qt::AlignLeft);
-                            }
-
-                          inline_row->addWidget (iw, 0, Qt::AlignBottom);
-                        }
-                      else
-                        {
-                          inline_row = nullptr;
-                          layout->addWidget (iw);
-                        }
-
-                      if (attr_justify_content == "space-between")
-                        {
-                          if (fd == "row")
-                            static_cast<QHBoxLayout *> (layout)->addStretch ();
-                          else
-                            static_cast<QVBoxLayout *> (layout)->addStretch ();
-                        }
-                    }
-
-                  return container;
-                }
-            }
+          if (ap.nodes->has_key ("grid-template-columns"))
+            attr_grid_cols
+                = _str_trim (ap.nodes->get_ifstr ("grid-template-columns"));
         }
+
+      LOG ("div display = '%s'\n", attr_display.data ());
+
+      if (attr_display == "none")
+        return nullptr;
+
+      auto *container = new QWidget ();
+      container->setAttribute (Qt::WA_TranslucentBackground);
+
+      if (attr_border.size ())
+        {
+          unsigned long long rcc = RAND_COUNT++;
+          std::string st_rcc
+              = std::string{ "__rsb_Div_Container_" } + std::to_string (rcc);
+
+          container->setObjectName (st_rcc);
+
+          container->setStyleSheet (
+              QString (("#" + st_rcc + " { border: %1; }").data ())
+                  .arg (QString::fromStdString (attr_border)));
+        }
+
+      const bool is_inline
+          = (attr_display == "inline" || attr_display == "inline-block"
+             || attr_display == "inline-flex"
+             || attr_display == "inline-grid");
+
+      container->setSizePolicy (
+          is_inline ? QSizePolicy::Preferred : QSizePolicy::Expanding,
+          attr_height.size () ? QSizePolicy::Fixed : QSizePolicy::Preferred);
+
+      apply_box_dimensions (container, attr_width, attr_height);
+
+      const int gap_px
+          = attr_gap.size ()
+                ? auroral::css_scale_unit::parse_type (attr_gap).value
+                : -1;
+
+      if (attr_display == "grid" || attr_display == "inline-grid")
+        {
+          int cols = _count_grid_tracks (attr_grid_cols);
+          LOG ("grid with %d column(s)\n", cols);
+
+          auto *grid = new QGridLayout (container);
+          grid->setContentsMargins (0, 0, 0, 0);
+          grid->setSpacing (gap_px >= 0 ? gap_px : 0);
+
+          int idx = 0;
+          for (auto &i : n->children)
+            {
+              QWidget *iw = build_widget (i);
+              if (!iw)
+                continue;
+
+              grid->addWidget (iw, idx / cols, idx % cols);
+              idx++;
+            }
+
+          return container;
+        }
+
+      if (attr_display == "flex" || attr_display == "inline-flex")
+        {
+          LOG ("flex direction = '%s'\n", fd.data ());
+
+          QBoxLayout *layout
+              = (fd == "column")
+                    ? static_cast<QBoxLayout *> (new QVBoxLayout (container))
+                    : static_cast<QBoxLayout *> (new QHBoxLayout (container));
+
+          layout->setContentsMargins (0, 0, 0, 0);
+          if (gap_px >= 0)
+            layout->setSpacing (gap_px);
+
+          Qt::Alignment item_align = {};
+          if (fd == "column")
+            {
+              if (attr_align_items == "center")
+                item_align = Qt::AlignHCenter;
+              else if (attr_align_items == "flex-end")
+                item_align = Qt::AlignRight;
+              else if (attr_align_items == "flex-start")
+                item_align = Qt::AlignLeft;
+            }
+          else
+            {
+              if (attr_align_items == "center")
+                item_align = Qt::AlignVCenter;
+              else if (attr_align_items == "flex-end")
+                item_align = Qt::AlignBottom;
+              else if (attr_align_items == "flex-start")
+                item_align = Qt::AlignTop;
+            }
+
+          /* justify-content -> main-axis distribution via stretch spacers. */
+          const std::string &jc = attr_justify_content;
+
+          int lead_stretch = (jc == "center" || jc == "flex-end"
+                              || jc == "space-around" || jc == "space-evenly")
+                                 ? 1
+                                 : 0;
+          int trail_stretch = (jc == "center" || jc == "flex-start"
+                               || jc == "space-around" || jc == "space-evenly")
+                                  ? 1
+                                  : 0;
+          int bet_stretch = (jc == "space-between" || jc == "space-evenly")
+                                ? 1
+                                : (jc == "space-around" ? 2 : 0);
+
+          populate_layout (layout, n, item_align, lead_stretch, trail_stretch,
+                           bet_stretch);
+
+          return container;
+        }
+
+      /* Default display:block behavior. */
+      QBoxLayout *layout
+          = is_inline
+                ? static_cast<QBoxLayout *> (new QHBoxLayout (container))
+                : static_cast<QBoxLayout *> (new QVBoxLayout (container));
+
+      layout->setContentsMargins (0, 0, 0, 0);
+      if (gap_px >= 0)
+        layout->setSpacing (gap_px);
+
+      Qt::Alignment item_align = is_inline ? Qt::AlignVCenter : Qt::AlignLeft;
+
+      populate_layout (layout, n, item_align, 0, 1, 0);
+
+      return container;
     }
 
   if (tn == "button")
@@ -843,6 +822,128 @@ v_browser::build_widget (equinox::Node *n)
 }
 
 void
+v_browser::populate_layout (QBoxLayout *layout, equinox::Node *n,
+                            Qt::Alignment item_align, int lead_stretch,
+                            int trail_stretch, int between_stretch)
+{
+  if (lead_stretch)
+    layout->addStretch (lead_stretch);
+
+  int slot_count = 0;
+  auto begin_slot = [&] ()
+    {
+      if (slot_count > 0 && between_stretch)
+        layout->addStretch (between_stretch);
+      slot_count++;
+    };
+
+  QWidget *inline_container = nullptr;
+  QHBoxLayout *inline_row = nullptr;
+  for (auto &i : n->children)
+    {
+      QWidget *iw = build_widget (i);
+
+      if (i->nd.name == "br")
+        {
+          if (inline_row)
+            inline_row->addStretch ();
+
+          inline_row = nullptr;
+          inline_container = nullptr;
+        }
+
+      if (!iw)
+        continue;
+
+      if (i->nd.name == "img" || i->nd.name == "input" || i->nd.name == "label"
+          || i->nd.name == "button")
+        {
+          if (!inline_row)
+            {
+              begin_slot ();
+
+              inline_container = new QWidget ();
+              inline_container->setSizePolicy (QSizePolicy::Preferred,
+                                               QSizePolicy::Fixed);
+
+              inline_row = new QHBoxLayout (inline_container);
+              inline_row->setAlignment (Qt::AlignLeft | Qt::AlignTop);
+              inline_row->setSpacing (8);
+              inline_row->setContentsMargins (0, 0, 0, 0);
+
+              inline_container->setStyleSheet ("background: transparent;");
+
+              layout->addWidget (inline_container, 0, item_align);
+            }
+
+          inline_row->addWidget (iw, 0, Qt::AlignBottom);
+        }
+      else
+        {
+          inline_row = nullptr;
+
+          begin_slot ();
+          layout->addWidget (iw, 0, item_align);
+        }
+    }
+
+  if (trail_stretch)
+    layout->addStretch (trail_stretch);
+}
+
+void
+v_browser::apply_box_dimensions (QWidget *container, const std::string &width,
+                                 const std::string &height)
+{
+  if (height.size ())
+    {
+      auroral::css_scale_unit cu
+          = auroral::css_scale_unit::parse_type (height);
+
+      switch (cu.type)
+        {
+        case auroral::AURORAL_CSS_SCALE_PX:
+          container->setFixedHeight (cu.value);
+          break;
+
+        case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
+          container->setFixedHeight (cu.value * meta->height / 100);
+          break;
+
+        case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
+          container->setFixedHeight (cu.value * meta->width / 100);
+          break;
+
+        default:
+          break;
+        }
+    }
+
+  if (width.size ())
+    {
+      auroral::css_scale_unit cu = auroral::css_scale_unit::parse_type (width);
+
+      switch (cu.type)
+        {
+        case auroral::AURORAL_CSS_SCALE_PX:
+          container->setFixedWidth (cu.value);
+          break;
+
+        case auroral::AURORAL_CSS_SCALE_VIEWPORT_HEIGHT:
+          container->setFixedWidth (cu.value * meta->height / 100);
+          break;
+
+        case auroral::AURORAL_CSS_SCALE_VIEWPORT_WIDTH:
+          container->setFixedWidth (cu.value * meta->width / 100);
+          break;
+
+        default:
+          break;
+        }
+    }
+}
+
+void
 v_browser::relayout_page ()
 {
   rt_layout->removeWidget (page_content);
@@ -859,4 +960,4 @@ v_browser::resizeEvent (QResizeEvent *e)
   // relayout_page ();
   timer->start (3);
 }
-};
+}; // namespace rs

@@ -54,6 +54,24 @@ public:
    */
   QWidget *build_widget (equinox::Node *);
 
+  /**
+   * @brief Populate a box layout with a node's children.
+   *
+   * Consecutive inline elements (img/input/label/button) are grouped into a
+   * shared horizontal row. The stretch parameters model CSS flex
+   * justify-content spacing (leading/trailing/between stretches), while
+   * @p item_align controls per-item cross-axis alignment.
+   */
+  void populate_layout (QBoxLayout *layout, equinox::Node *n,
+                        Qt::Alignment item_align, int lead_stretch,
+                        int trail_stretch, int between_stretch);
+
+  /**
+   * @brief Apply CSS width/height (px, vw, vh) as fixed dimensions.
+   */
+  void apply_box_dimensions (QWidget *container, const std::string &width,
+                             const std::string &height);
+
   void relayout_page ();
 
   void resizeEvent (QResizeEvent *);

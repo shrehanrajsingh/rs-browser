@@ -71,7 +71,7 @@ w_browser::w_browser ()
              });
 
   /* get new tab html */
-  std::ifstream f ("../resources/home.html");
+  std::ifstream f ("../resources/counter.html");
 
   if (!f.is_open ())
     {
