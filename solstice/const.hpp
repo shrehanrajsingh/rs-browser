@@ -2,10 +2,10 @@
 #define SOLSTICE_CONST_HPP
 
 #include "header.hpp"
+#include "types.hpp"
 
 namespace solstice
 {
-using sol_string = std::string;
 
 enum class ConstType
 {
