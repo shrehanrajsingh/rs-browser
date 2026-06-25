@@ -35,6 +35,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Network Sql Xml)
 
 add_subdirectory(equinox)
 add_subdirectory(auroral)
+add_subdirectory(solstice)
 
 add_executable(
     rsbrowser

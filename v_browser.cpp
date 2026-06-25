@@ -140,6 +140,32 @@ v_browser::build_widget (equinox::Node *n)
 {
   std::string &tn = n->nd.name;
 
+  if (tn == "[text]")
+    {
+      std::string text = "";
+
+      try
+        {
+          text = n->nd.get_attr ("_");
+        }
+      catch (const std::exception &e)
+        {
+          /* no text payload */
+        }
+
+      if (_str_trim (text).empty ())
+        return nullptr;
+
+      auto *label = new QLabel (QString::fromStdString (_str_trim (text)));
+
+      label->setAttribute (Qt::WA_TranslucentBackground);
+      label->setStyleSheet ("font-size: 16px;");
+      label->setAlignment (Qt::AlignLeft | Qt::AlignVCenter);
+      label->setSizePolicy (QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+      return label;
+    }
+
   if (tn == "body")
     {
       auto *container = new QWidget ();
@@ -201,7 +227,8 @@ v_browser::build_widget (equinox::Node *n)
             continue;
 
           if (i->nd.name == "img" || i->nd.name == "input"
-              || i->nd.name == "label" || i->nd.name == "button")
+              || i->nd.name == "label" || i->nd.name == "button"
+              || i->nd.name == "[text]")
             {
               if (!inline_row)
                 {
@@ -755,7 +782,6 @@ v_browser::build_widget (equinox::Node *n)
                 item_align = Qt::AlignTop;
             }
 
-          /* justify-content -> main-axis distribution via stretch spacers. */
           const std::string &jc = attr_justify_content;
 
           int lead_stretch = (jc == "center" || jc == "flex-end"
@@ -803,6 +829,7 @@ v_browser::build_widget (equinox::Node *n)
         background: #d1caca;
         border-radius: 4px;
         color: black;
+        font-size: 18px;
       )";
 
       try
@@ -856,7 +883,7 @@ v_browser::populate_layout (QBoxLayout *layout, equinox::Node *n,
         continue;
 
       if (i->nd.name == "img" || i->nd.name == "input" || i->nd.name == "label"
-          || i->nd.name == "button")
+          || i->nd.name == "button" || i->nd.name == "[text]")
         {
           if (!inline_row)
             {

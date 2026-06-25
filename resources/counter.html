@@ -7,8 +7,20 @@
     <h1>Hi, welcome to my counter</h1>
 
     <div>
-      <h3>Count: 0</h3>
-      <button>Press to increase count</button>
+      <div style="display: flex; flex-direction: row">
+        Count:
+        <div id="count">0</div>
+      </div>
+      <button id="btn" style="padding: 6px">Press to increase count</button>
     </div>
   </body>
+
+  <script>
+    let btn = document.getElementById("btn");
+
+    btn.onclick = function (e) {
+      let c = document.getElementById("count");
+      c.innerHTML = `${parseInt(c.innerHTML) + 1}`;
+    };
+  </script>
 </html>
