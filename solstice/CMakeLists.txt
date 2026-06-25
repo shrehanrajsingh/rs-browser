@@ -10,6 +10,9 @@ add_subdirectory(tests)
 add_library(
     solstice
     header.hpp
+    expr.hpp expr.cpp
+    stmt.hpp stmt.cpp
+    const.hpp const.cpp
     solstice.hpp solstice.cpp
 )
 
