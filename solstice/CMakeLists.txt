@@ -14,6 +14,7 @@ add_library(
     expr.hpp expr.cpp
     stmt.hpp stmt.cpp
     const.hpp const.cpp
+    ast.hpp ast.cpp
     solstice.hpp solstice.cpp
 )
 

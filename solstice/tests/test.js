@@ -1,4 +1,4 @@
-let a = 10;
+let a = "Shrehan";
 let b = 20;
 let c = 30;
 
