@@ -105,7 +105,7 @@ The Doxygen main page is defined in main.hpp.
 
 - auroral/       CSS parser engine
 - equinox/       HTML parser engine
-- solstice/      JavaScript engine (placeholder)
+- solstice/      JavaScript engine (WIP)
 - resources/     HTML and image assets used at runtime
 - docs/images/   Project screenshots for documentation
 
