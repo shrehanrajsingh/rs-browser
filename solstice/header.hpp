@@ -5,6 +5,7 @@
 #include <cctype>
 #include <complex>
 #include <cstdarg>
+#include <cstdint>
 #include <exception>
 #include <fstream>
 #include <functional>

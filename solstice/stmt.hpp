@@ -22,6 +22,12 @@ class Statement
 public:
   explicit Statement (StmtType _Type) : type{ _Type } {}
   virtual ~Statement () {}
+
+  inline const StmtType &
+  get_type ()
+  {
+    return type;
+  }
 };
 
 class stmt_vardecl : public Statement
@@ -88,6 +94,8 @@ public:
 
   ~stmt_fundecl () {}
 };
+
+void print_statement (Statement *);
 } // namespace solstice
 
 #endif // SOLSTICE_STMT_HPP

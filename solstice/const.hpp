@@ -34,9 +34,9 @@ public:
 class const_int : public Constant
 {
 public:
-  int64_t v;
+  sol_int v;
 
-  explicit const_int (int64_t _V) : Constant (ConstType::CONST_INT), v{ _V } {}
+  explicit const_int (sol_int _V) : Constant (ConstType::CONST_INT), v{ _V } {}
   ~const_int () {}
 };
 
@@ -80,6 +80,8 @@ public:
   explicit const_undefined () : Constant (ConstType::CONST_UNDEFINED) {}
   ~const_undefined () {}
 };
+
+void print_constant (Constant *);
 } // namespace solstice
 
 #endif // SOLSTICE_CONST_HPP

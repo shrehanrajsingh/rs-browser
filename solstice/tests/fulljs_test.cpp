@@ -16,7 +16,10 @@ main (int argc, char const *argv[])
 
   std::string fc = ss.str ();
 
-  solstice::make_ast (fc);
+  auto v = solstice::make_ast (fc);
+
+  for (auto &&i : v)
+    solstice::print_statement (i);
 
   f.close ();
   return 0;

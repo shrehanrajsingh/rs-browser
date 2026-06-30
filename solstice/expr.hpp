@@ -8,7 +8,8 @@ namespace solstice
 {
 enum class ExprType
 {
-  EXPR_CONST
+  EXPR_CONST,
+  EXPR_VAR
 };
 
 class Expression
@@ -38,6 +39,21 @@ public:
 
   ~expr_const () {}
 };
+
+class expr_var : public Expression
+{
+public:
+  sol_string name;
+
+  explicit expr_var (sol_string _Name)
+      : Expression (ExprType::EXPR_VAR), name{ _Name }
+  {
+  }
+
+  ~expr_var () {}
+};
+
+void print_expr (Expression *);
 } // namespace solstice
 
 #endif // SOLSTICE_EXPR_HPP
