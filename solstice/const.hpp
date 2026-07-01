@@ -82,6 +82,7 @@ public:
 };
 
 void print_constant (Constant *);
+bool const_eqeq (Constant *&, Constant *&);
 } // namespace solstice
 
 #endif // SOLSTICE_CONST_HPP

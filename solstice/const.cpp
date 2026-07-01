@@ -48,4 +48,51 @@ print_constant (Constant *c)
       }
     }
 }
+
+bool
+const_eqeq (Constant *&a, Constant *&b)
+{
+  if (a->get_type () != b->get_type ())
+    return false;
+
+  switch (a->get_type ())
+    {
+    case ConstType::CONST_BOOL:
+      {
+        return dynamic_cast<const_bool *> (a)->v
+               == dynamic_cast<const_bool *> (b)->v;
+      }
+      break;
+
+    case ConstType::CONST_FLOAT:
+      {
+        return dynamic_cast<const_float *> (a)->v
+               == dynamic_cast<const_float *> (b)->v;
+      }
+      break;
+
+    case ConstType::CONST_INT:
+      {
+        return dynamic_cast<const_int *> (a)->v
+               == dynamic_cast<const_int *> (b)->v;
+      }
+      break;
+
+    case ConstType::CONST_STRING:
+      {
+        return dynamic_cast<const_string *> (a)->v
+               == dynamic_cast<const_string *> (b)->v;
+      }
+      break;
+
+    case ConstType::CONST_UNDEFINED:
+      return true; /* both types are same */
+      break;
+
+    default:
+      break;
+    }
+
+  return false;
+}
 } // namespace solstice

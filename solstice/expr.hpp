@@ -25,6 +25,12 @@ public:
   {
     return type;
   }
+
+  inline const ExprType &
+  get_type () const
+  {
+    return type;
+  }
 };
 
 class expr_const : public Expression

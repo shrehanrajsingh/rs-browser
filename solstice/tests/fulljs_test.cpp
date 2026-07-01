@@ -21,6 +21,21 @@ main (int argc, char const *argv[])
   for (auto &&i : v)
     solstice::print_statement (i);
 
+  solstice::vm_t *vm = new solstice::vm_t;
+  solstice::codegen (vm, v);
+
+  std::cout << std::endl;
+  for (solstice::bytecode_t &i : vm->c)
+    {
+      solstice::print_bytecode (i);
+    }
+
+  std::cout << std::endl;
+  for (solstice::Constant *&i : vm->table_const)
+    {
+      solstice::print_constant (i);
+    }
+
   f.close ();
   return 0;
 }
