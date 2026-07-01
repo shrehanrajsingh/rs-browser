@@ -106,4 +106,45 @@ vm_t::add_to_tc_if_not_exists (Constant *c)
       table_const.push_back (c);
     }
 }
+
+void
+vm_t::execute ()
+{
+  while (ip < c.size ())
+    {
+      bytecode_t &t = c[ip++];
+
+      switch (t.get_type ())
+        {
+        case ByteCodeType::OP_LOAD_CONST:
+          {
+            /* TODOOOOOOOOOOOOOOOOOO */
+            /* writing TODO with many Os to get rid of
+                the "Implement with Codex" button */
+          }
+          break;
+
+        case ByteCodeType::OP_LOAD_NAME:
+          {
+            /* TODOOOOOOOOOOOOO */
+          }
+          break;
+
+        case ByteCodeType::OP_STORE_FRAME:
+          {
+            /* TODOOOOOOO */
+          }
+          break;
+
+        case ByteCodeType::OP_STORE_GLOBAL:
+          {
+            /* TODOOOOOOOOOOO */
+          }
+          break;
+
+        default:
+          break;
+        }
+    }
+}
 } // namespace solstice

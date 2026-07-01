@@ -88,6 +88,8 @@ public:
 
   void add_to_tc_if_not_exists (Constant *);
 
+  void execute ();
+
   ~vm_t ()
   {
     /**
