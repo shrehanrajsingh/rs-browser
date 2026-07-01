@@ -15,6 +15,8 @@ add_library(
     stmt.hpp stmt.cpp
     const.hpp const.cpp
     ast.hpp ast.cpp
+    vm.hpp vm.cpp
+    codegen.hpp codegen.cpp
     solstice.hpp solstice.cpp
 )
 
