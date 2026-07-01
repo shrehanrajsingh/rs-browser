@@ -73,17 +73,18 @@ class vm_t
 {
 public:
   sol_vec<bytecode_t> c;
+  size_t ip;
 
   sol_vec<Object *> g;    /* globals */
   sol_stack<frame_t *> f; /* frames */
   sol_stack<Object *> s;  /* stack */
 
-  sol_vec<Constant *> table_const;
+  sol_vec<Constant *> table_const; /* table of constants */
 
   cg_dbg_t *cgi; /* codegen info */
 
-  vm_t () : cgi{ new cg_dbg_t () } {}
-  vm_t (sol_vec<bytecode_t> _C) : c{ _C } {}
+  vm_t () : cgi{ new cg_dbg_t () }, ip{ 0 } {}
+  vm_t (sol_vec<bytecode_t> _C) : c{ _C }, cgi{ new cg_dbg_t () }, ip{ 0 } {}
 
   void add_to_tc_if_not_exists (Constant *);
 
