@@ -2,5 +2,4 @@
 
 namespace solstice
 {
-
 } // namespace solstice

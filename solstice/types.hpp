@@ -7,6 +7,8 @@ namespace solstice
 {
 using sol_string = std::string;
 template <typename T> using sol_vec = std::vector<T>;
+template <typename U, V> using sol_map = std::map<U, V>;
+template <typename T> using sol_stack = std::stack<T>;
 
 #if defined(INT64_MAX)
 using sol_int = int64_t;

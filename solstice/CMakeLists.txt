@@ -17,6 +17,8 @@ add_library(
     ast.hpp ast.cpp
     vm.hpp vm.cpp
     codegen.hpp codegen.cpp
+    obj.hpp obj.cpp
+    frame.hpp frame.cpp
     solstice.hpp solstice.cpp
 )
 
