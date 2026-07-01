@@ -18,8 +18,8 @@ print_bytecode (bytecode_t &b)
     case ByteCodeType::OP_STORE_GLOBAL:
       std::cout << "OP_STORE_GLOBAL";
       break;
-    case ByteCodeType::OP_STORE_FRAME:
-      std::cout << "OP_STORE_FRAME";
+    case ByteCodeType::OP_STORE_LOCAL:
+      std::cout << "OP_STORE_LOCAL";
       break;
     case ByteCodeType::OP_LOAD_NAME:
       std::cout << "OP_LOAD_NAME";

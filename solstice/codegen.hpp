@@ -13,7 +13,7 @@ enum class ByteCodeType
 {
   OP_LOAD_CONST,
   OP_STORE_GLOBAL, /* store var globally */
-  OP_STORE_FRAME,  /* store var in frame (locals) */
+  OP_STORE_LOCAL,  /* store var in frame (locals) */
   OP_LOAD_NAME,
 };
 

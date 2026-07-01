@@ -130,7 +130,7 @@ vm_t::execute ()
           }
           break;
 
-        case ByteCodeType::OP_STORE_FRAME:
+        case ByteCodeType::OP_STORE_LOCAL:
           {
             /* TODOOOOOOO */
           }
