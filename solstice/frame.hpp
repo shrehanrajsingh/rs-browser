@@ -16,6 +16,15 @@ public:
 
   frame_t () {}
   ~frame_t () {}
+
+  inline Object *&
+  get_local (size_t i)
+  {
+    if (i > l.size ())
+      throw std::out_of_range ("Invalid local access");
+
+    return l[i];
+  }
 };
 } // namespace solstice
 
