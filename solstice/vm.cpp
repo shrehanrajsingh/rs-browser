@@ -110,6 +110,14 @@ vm_t::add_to_tc_if_not_exists (Constant *c)
 void
 vm_t::execute ()
 {
+  if (f.empty ())
+    {
+      throw std::runtime_error ("VM called with no frame.\n");
+      return;
+    }
+
+  frame_t *&fr = f.pop ();
+
   while (ip < c.size ())
     {
       bytecode_t &t = c[ip++];
@@ -118,27 +126,72 @@ vm_t::execute ()
         {
         case ByteCodeType::OP_LOAD_CONST:
           {
-            /* TODOOOOOOOOOOOOOOOOOO */
-            /* writing TODO with many Os to get rid of
-                the "Implement with Codex" button */
+            Constant *c = table_const[t.get_a ()];
+            Object *co = o->from_const (c);
+
+            co->inc_count ();
+            s.push (co);
           }
           break;
 
         case ByteCodeType::OP_LOAD_NAME:
           {
-            /* TODOOOOOOOOOOOOO */
+            int idx = t.get_a ();
+
+            if (t.get_b ())
+              {
+                /* frame */
+                /* TODOOOOOOOOOOOOO */
+              }
+            else
+              {
+                /* global */
+                if (idx > g.size () || idx < 0)
+                  throw std::invalid_argument ("name does not exist.\n");
+
+                Object *nn = g[idx];
+
+                if (nn == nullptr)
+                  throw std::invalid_argument ("corrupted object.\n");
+
+                nn->inc_count ();
+                s.push (nn);
+              }
           }
           break;
 
         case ByteCodeType::OP_STORE_LOCAL:
           {
-            /* TODOOOOOOO */
+            int idx = t.get_a ();
+
+            if (s.empty ())
+              throw std::runtime_error (
+                  "nothing to store into local variable.\n");
+
+            Object *oo = s.pop ();
+            /* already IR'ed */
+
+            while (idx >= fr->l.size ())
+              fr->l.push_back (nullptr);
+
+            fr->l[idx] = oo;
           }
           break;
 
         case ByteCodeType::OP_STORE_GLOBAL:
           {
-            /* TODOOOOOOOOOOO */
+            int idx = t.get_a ();
+
+            if (s.empty ())
+              throw std::runtime_error ("nothing to store into variable.\n");
+
+            Object *oo = s.pop ();
+            /* already IR'ed */
+
+            while (idx >= g.size ())
+              g.push_back (nullptr);
+
+            g[idx] = oo;
           }
           break;
 

@@ -18,15 +18,37 @@ class Object
 {
 private:
   ObjType type;
+  size_t count;
+
+  //   std::mutex clk;
 
 public:
-  explicit Object (ObjType _Type) : type{ _Type } {}
+  explicit Object (ObjType _Type) : type{ _Type }, count{ 0 } {}
   virtual ~Object () {}
 
   inline const ObjType &
   get_type ()
   {
     return type;
+  }
+
+  inline const size_t &
+  get_count ()
+  {
+    return count;
+  }
+
+  inline void
+  inc_count ()
+  {
+    count++;
+  }
+
+  inline void
+  dec_count ()
+  {
+    if (count)
+      count--;
   }
 };
 

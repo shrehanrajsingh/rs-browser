@@ -19,6 +19,7 @@ add_library(
     codegen.hpp codegen.cpp
     obj.hpp obj.cpp
     frame.hpp frame.cpp
+    objstore.hpp objstore.cpp
     solstice.hpp solstice.cpp
 )
 

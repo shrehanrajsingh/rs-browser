@@ -36,6 +36,8 @@ main (int argc, char const *argv[])
       solstice::print_constant (i);
     }
 
+  vm->execute ();
+
   f.close ();
   return 0;
 }

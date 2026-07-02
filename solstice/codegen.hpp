@@ -9,12 +9,18 @@
 
 namespace solstice
 {
+/**
+ * OP_LOAD_CONST: a -> entry in table_const
+ * OP_STORE_GLOBAL: a -> slot number
+ * OP_STORE_LOCAL: a -> slot number
+ * OP_LOAD_NAME: a -> slot number, b -> 0 (global), 1 (frame)
+ */
 enum class ByteCodeType
 {
-  OP_LOAD_CONST,
+  OP_LOAD_CONST,   /* load a const from table_const and push to stack */
   OP_STORE_GLOBAL, /* store var globally */
   OP_STORE_LOCAL,  /* store var in frame (locals) */
-  OP_LOAD_NAME,
+  OP_LOAD_NAME,    /* read a var and push it's value to stack */
 };
 
 class bytecode_t

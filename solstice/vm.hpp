@@ -7,6 +7,7 @@
 #include "frame.hpp"
 #include "header.hpp"
 #include "obj.hpp"
+#include "objstore.hpp"
 #include "stmt.hpp"
 #include "types.hpp"
 
@@ -78,13 +79,18 @@ public:
   sol_vec<Object *> g;    /* globals */
   sol_stack<frame_t *> f; /* frames */
   sol_stack<Object *> s;  /* stack */
+  ObjectStore *o;         /* object store */
 
   sol_vec<Constant *> table_const; /* table of constants */
 
   cg_dbg_t *cgi; /* codegen info */
 
-  vm_t () : cgi{ new cg_dbg_t () }, ip{ 0 } {}
-  vm_t (sol_vec<bytecode_t> _C) : c{ _C }, cgi{ new cg_dbg_t () }, ip{ 0 } {}
+  vm_t () : cgi{ new cg_dbg_t () }, ip{ 0 }, o{ new ObjectStore () } {}
+
+  vm_t (sol_vec<bytecode_t> _C)
+      : c{ _C }, cgi{ new cg_dbg_t () }, ip{ 0 }, o{ new ObjectStore () }
+  {
+  }
 
   void add_to_tc_if_not_exists (Constant *);
 
@@ -97,10 +103,13 @@ public:
      * the structure.
      * we need to take care of the underlying children as well
      */
-
     if (cgi != nullptr)
       delete cgi;
     cgi = nullptr;
+
+    if (o != nullptr)
+      delete o;
+    o = nullptr;
   }
 };
 
