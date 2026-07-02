@@ -14,13 +14,19 @@ namespace solstice
  * OP_STORE_GLOBAL: a -> slot number
  * OP_STORE_LOCAL: a -> slot number
  * OP_LOAD_NAME: a -> slot number, b -> 0 (global), 1 (frame)
+ * OP_RETURN: 0, 0, nullptr
+ * OP_JUMP: a -> index to jump (0-indexed)
+ * OP_STOREFUNC_GLOBAL: a -> slot number, b -> ip
  */
 enum class ByteCodeType
 {
-  OP_LOAD_CONST,   /* load a const from table_const and push to stack */
-  OP_STORE_GLOBAL, /* store var globally */
-  OP_STORE_LOCAL,  /* store var in frame (locals) */
-  OP_LOAD_NAME,    /* read a var and push it's value to stack */
+  OP_LOAD_CONST,       /* load a const from table_const and push to stack */
+  OP_STORE_GLOBAL,     /* store var globally */
+  OP_STORE_LOCAL,      /* store var in frame (locals) */
+  OP_LOAD_NAME,        /* read a var and push it's value to stack */
+  OP_RETURN,           /* pop top ip */
+  OP_JUMP,             /* jump to bytecode address (0-indexed) */
+  OP_STOREFUNC_GLOBAL, /* store function in globals */
 };
 
 class bytecode_t

@@ -12,6 +12,7 @@ namespace solstice
 enum class ObjType
 {
   OBJ_CONST,
+  OBJ_FUNC,
 };
 
 class Object
@@ -59,6 +60,20 @@ public:
 
   explicit obj_const (Constant *_C) : Object (ObjType::OBJ_CONST), c{ _C } {}
   ~obj_const () {}
+};
+
+class obj_func : public Object
+{
+public:
+  sol_string name;
+  size_t ip;
+
+  explicit obj_func (sol_string _Name, size_t _Ip)
+      : Object (ObjType::OBJ_FUNC), name{ _Name }, ip{ _Ip }
+  {
+  }
+
+  ~obj_func () {}
 };
 } // namespace solstice
 

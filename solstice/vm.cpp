@@ -29,6 +29,45 @@ _codegen_stmt_one (vm_t *&vm, Statement *&s)
 
     case StmtType::STMT_FUNDECL:
       {
+        stmt_fundecl *i = static_cast<stmt_fundecl *> (s);
+
+        sol_string &name = i->name;
+        sol_vec<sol_string> &args = i->args;
+        sol_vec<Statement *> &body = i->body;
+
+        cg_dbg_t *pcgi = vm->cgi;
+
+        vm->cgi->c = new cg_dbg_t ();
+        vm->cgi->c->p = vm->cgi;
+        vm->cgi = vm->cgi->c;
+
+        ADD_BC (ByteCodeType::OP_JUMP, 0, 0, nullptr);
+
+        size_t pip = vm->c.size ();
+        bytecode_t &jc = vm->c.back ();
+
+        for (sol_string &j : args)
+          {
+            vm->cgi->vim_add (j, vm->cgi->idx);
+            ADD_BC (ByteCodeType::OP_STORE_LOCAL, vm->cgi->idx,
+                    0 /* no levels up */, nullptr);
+
+            vm->cgi->idx++;
+          }
+
+        for (Statement *&j : body)
+          {
+            _codegen_stmt_one (vm, j);
+          }
+
+        ADD_BC (ByteCodeType::OP_RETURN, 0, 0, nullptr);
+        jc.get_a () = vm->c.size ();
+
+        ADD_BC (ByteCodeType::OP_STOREFUNC_GLOBAL, vm->cgi->idx, pip, nullptr);
+
+        delete vm->cgi;
+        vm->cgi = pcgi;
+        vm->cgi->c = nullptr;
       }
       break;
 
@@ -116,7 +155,8 @@ vm_t::execute ()
       return;
     }
 
-  frame_t *&fr = f.pop ();
+  frame_t *&fr = f.top ();
+  f.pop ();
 
   while (ip < c.size ())
     {
@@ -142,6 +182,13 @@ vm_t::execute ()
               {
                 /* frame */
                 /* TODOOOOOOOOOOOOO */
+
+                /**
+                 * this is tricky because if I need more
+                 * information for recursive frame.
+                 * What if the variable is in a frame a
+                 * few levels up?
+                 */
               }
             else
               {
@@ -168,7 +215,8 @@ vm_t::execute ()
               throw std::runtime_error (
                   "nothing to store into local variable.\n");
 
-            Object *oo = s.pop ();
+            Object *oo = s.top ();
+            s.pop ();
             /* already IR'ed */
 
             while (idx >= fr->l.size ())
@@ -185,7 +233,8 @@ vm_t::execute ()
             if (s.empty ())
               throw std::runtime_error ("nothing to store into variable.\n");
 
-            Object *oo = s.pop ();
+            Object *oo = s.top ();
+            s.pop ();
             /* already IR'ed */
 
             while (idx >= g.size ())

@@ -26,6 +26,13 @@ ObjectStore::request (ObjType t)
       }
       break;
 
+    case ObjType::OBJ_FUNC:
+      {
+        obj_func *fo = new obj_func ("", 0);
+        res = static_cast<Object *> (fo);
+      }
+      break;
+
     default:
       break;
     }

@@ -47,7 +47,8 @@ l1:;
 bool
 _check_is_reserved (char *a, char *b)
 {
-  static const char *reserved[] = { "if", "else", "while", "return", NULL };
+  static const char *reserved[]
+      = { "if", "else", "while", "return", "function", NULL };
 
   char *ap = a;
 
@@ -149,8 +150,8 @@ _stmt_getone (char *&p)
   if (c == '\0')
     return nullptr;
 
-  if (_peek_top (p, "let ")) /* the end space is important since that makes is
-                                a full token */
+  if (_peek_top (p, "let ") || _peek_top (p, "let\t")) /* the end space is
+                                important since that makes is a full token */
     {
       p += 4;
       _eat_spaces (p);
@@ -259,6 +260,37 @@ _stmt_getone (char *&p)
 
       delete[] vbk_p;
       return static_cast<Statement *> (vd);
+    }
+  else if (_peek_top (p, "function ")
+           || _peek_top (p,
+                         "function\t")) /* I need a better peeking mechanism */
+    {
+      p += 8;
+      _eat_spaces (p);
+
+      char *ns = p; /* name start */
+
+      while (*p != '\0' && !std::isspace (*p) && *p != '(')
+        {
+          p++;
+        }
+
+      char *fname = new char[p - ns + 1];
+      strncpy (fname, ns, p - ns);
+      fname[p - ns] = '\0';
+
+      while (*p != '\0' && *p != '(')
+        p++;
+
+      LOG ("parsed function name '%s'\n", fname);
+
+      if (*p != '(')
+        throw std::runtime_error (
+            "syntax error, expected '(', got '%c' (%d)\n", *p, *p);
+
+      p++; // eat '('
+
+      delete[] fname;
     }
 
   return nullptr;

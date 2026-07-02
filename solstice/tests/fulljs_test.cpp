@@ -24,6 +24,8 @@ main (int argc, char const *argv[])
   solstice::vm_t *vm = new solstice::vm_t;
   solstice::codegen (vm, v);
 
+  vm->f.push (new solstice::frame_t ());
+
   std::cout << std::endl;
   for (solstice::bytecode_t &i : vm->c)
     {
